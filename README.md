@@ -1,2 +1,2 @@
-# quizme-api
+# QuizMe API
 RESTful API for QuizMe.
