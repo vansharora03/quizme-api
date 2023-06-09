@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -9,7 +10,10 @@ import (
 )
 
 func TestServerHealth(t *testing.T) {
+	// Create a new health instance
 	h, _ := health.New(health.WithSystemInfo())
+
+	// Register a new health check
 	h.Register(health.Config{
 		Name:      "http-check",
 		Timeout:   time.Second * 5,
@@ -19,4 +23,7 @@ func TestServerHealth(t *testing.T) {
 		}),
 	})
 
+	// Run the health checks
+	http.Handle("/status", h.Handler())
+	http.ListenAndServe(":8080", nil)
 }
