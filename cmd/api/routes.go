@@ -5,9 +5,14 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
+
+	// Middleware chain
+	standardMiddleware := alice.New(app.logRequest, secureHeaders)
+
 	router := httprouter.New()
 
 	// Router Settings
@@ -20,5 +25,5 @@ func (app *application) routes() http.Handler {
 		fmt.Fprintf(w, "Environment: %s\nVersion: %s", app.config.env, version)
 	})
 
-	return secureHeaders(router)
+	return standardMiddleware.Then(router)
 }
