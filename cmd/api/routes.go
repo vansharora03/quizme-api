@@ -20,5 +20,5 @@ func (app *application) routes() http.Handler {
 		fmt.Fprintf(w, "Environment: %s\nVersion: %s", app.config.env, version)
 	})
 
-	return secureHeaders(router)
+	return app.logRequest(secureHeaders(router))
 }
