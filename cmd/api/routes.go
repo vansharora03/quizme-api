@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	// Router Settings
@@ -20,5 +20,5 @@ func (app *application) routes() *httprouter.Router {
 		fmt.Fprintf(w, "Environment: %s\nVersion: %s", app.config.env, version)
 	})
 
-	return router
+	return secureHeaders(router)
 }
