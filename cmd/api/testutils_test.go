@@ -11,8 +11,7 @@ type testServer struct {
 	*httptest.Server
 }
 
-// newTestServer returns a new mock test server.
-func newTestServer(t *testing.T) *testServer {
+func newTestApp(t *testing.T) *application {
 	cfg := config{
 		env: "development",
 	}
@@ -20,7 +19,12 @@ func newTestServer(t *testing.T) *testServer {
 		config: cfg,
 		logger: nil,
 	}
-	return &testServer{httptest.NewServer(testApp.routes())}
+	return testApp
+}
+
+// newTestServer returns a new mock test server.
+func newTestServer(t *testing.T) *testServer {
+	return &testServer{httptest.NewServer(newTestApp(t).routes())}
 }
 
 // GET performs a get request on ts upon
