@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,10 +17,15 @@ func newTestApp(t *testing.T) *application {
 	cfg := config{
 		env: "development",
 	}
+
+	// Create a new buffer for the logger
+	buffer := []byte{}
 	testApp := &application{
 		config: cfg,
-		logger: nil,
+		// Create a new logger with the buffer
+		logger: log.New(bytes.NewBuffer(buffer), "", log.Default().Flags()),
 	}
+
 	return testApp
 }
 
