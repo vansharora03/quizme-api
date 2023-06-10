@@ -20,7 +20,7 @@ type writeJSONSubtest struct {
 func TestWriteJSON(t *testing.T) {
 	tests := []writeJSONSubtest{
 		{name: "Should work for structs",
-			data: struct{ Hello string }{Hello: "world"}, code: 200, expectedJSON: []byte("{\"Hello\":\"world\"}")},
+			data: struct{ Hello string }{Hello: "world"}, code: 200, expectedJSON: []byte("{\"Helo\":\"world\"}")},
 	}
 
 	for _, tt := range tests {
