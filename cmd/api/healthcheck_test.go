@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -20,10 +22,18 @@ func TestHealthCheck(t *testing.T) {
 		t.Errorf("Expected status code %d, but got %d", expectedStatus, statusCode)
 	}
 
-	// Check if the server is listening and returns the expected body
-	expectedBody := fmt.Sprintf("Environment: development\nVersion: %s", version)
-	if expectedBody != string(body) {
-		t.Errorf("Expected body %s, but got %s", expectedBody, string(body))
+	expectedBody := map[string]string{
+		"environment": "development",
+		"version":     "1.0.0",
+	}
+
+	dst := map[string]string{}
+	r, err := http.NewRequest("GET", "/v1/healthcheck", bytes.NewBuffer(body))
+	check(t, err)
+	err = ts.app.readJSON(httptest.NewRecorder(), r, &dst)
+	check(t, err)
+	if !reflect.DeepEqual(dst, expectedBody) {
+		t.Fatalf("INCORRECT JSON RESPONSE: expected %v, got %v", expectedBody, dst)
 	}
 
 }
