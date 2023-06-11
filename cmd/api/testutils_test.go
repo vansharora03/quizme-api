@@ -42,10 +42,12 @@ func newTestServer(t *testing.T) *testServer {
 	return &testServer{app, httptest.NewServer(app.routes())}
 }
 
-// GET performs a get request on ts upon
+// testGET performs a get request on ts upon
 // the supplied url path and returns the
-// headers, status code, and body.
-func (ts *testServer) GET(t *testing.T, urlPath string) (http.Header, int, []byte) {
+// headers, status code, and body. Initialize
+// the generic to be the type of the json response
+// once converted to a Go value.
+func testGET[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, int, T) {
 	// Make request
 	rs, err := ts.Client().Get(ts.URL + urlPath)
 	// Fail test on error
@@ -58,6 +60,13 @@ func (ts *testServer) GET(t *testing.T, urlPath string) (http.Header, int, []byt
 	// Fail test on error
 	check(t, err)
 
-	return rs.Header, rs.StatusCode, body
+	var dst T
+	rr := httptest.NewRecorder()
+	r, err := http.NewRequest("GET", urlPath, bytes.NewBuffer(body))
+	check(t, err)
+	err = ts.app.readJSON(rr, r, &dst)
+	check(t, err)
+
+	return rs.Header, rs.StatusCode, dst
 
 }
