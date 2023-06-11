@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 )
@@ -14,7 +12,7 @@ func TestHealthCheck(t *testing.T) {
 	defer ts.Close()
 
 	// Make a GET request to the health check endpoint
-	_, statusCode, body := ts.GET(t, "/v1/healthcheck")
+	_, statusCode, body := testGET[map[string]string](t, ts, "/v1/healthcheck")
 
 	// Check if the server is listening and returns the expected status code
 	expectedStatus := http.StatusOK
@@ -27,13 +25,8 @@ func TestHealthCheck(t *testing.T) {
 		"version":     "1.0.0",
 	}
 
-	dst := map[string]string{}
-	r, err := http.NewRequest("GET", "/v1/healthcheck", bytes.NewBuffer(body))
-	check(t, err)
-	err = ts.app.readJSON(httptest.NewRecorder(), r, &dst)
-	check(t, err)
-	if !reflect.DeepEqual(dst, expectedBody) {
-		t.Fatalf("INCORRECT JSON RESPONSE: expected %v, got %v", expectedBody, dst)
+	if !reflect.DeepEqual(body, expectedBody) {
+		t.Fatalf("INCORRECT JSON RESPONSE: expected %v, got %v", expectedBody, body)
 	}
 
 }

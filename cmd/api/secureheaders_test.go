@@ -9,7 +9,7 @@ func TestSecureHeader(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
 
-	header, _, _ := ts.GET(t, "/")
+	header, _, _ := testGET[interface{}](t, ts, "/")
 
 	// Check if the server is listening and returns the expected headers
 
