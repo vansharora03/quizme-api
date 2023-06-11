@@ -10,6 +10,7 @@ import (
 )
 
 type testServer struct {
+	app *application
 	*httptest.Server
 }
 
@@ -37,7 +38,8 @@ func check(t *testing.T, err error) {
 
 // newTestServer returns a new mock test server.
 func newTestServer(t *testing.T) *testServer {
-	return &testServer{httptest.NewServer(newTestApp(t).routes())}
+	app := newTestApp(t)
+	return &testServer{app, httptest.NewServer(app.routes())}
 }
 
 // GET performs a get request on ts upon

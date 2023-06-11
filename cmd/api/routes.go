@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -21,9 +20,7 @@ func (app *application) routes() http.Handler {
 	// router.MethodNotAllowed = ?
 
 	// Routes for application
-	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Environment: %s\nVersion: %s", app.config.env, version)
-	})
+	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	return standardMiddleware.Then(router)
 }
