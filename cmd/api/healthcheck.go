@@ -7,7 +7,7 @@ import "net/http"
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{}
 	response["environment"] = "development"
-	response["version"] = "1.0.0"
+	response["version"] = version
 	err := app.writeJSON(w, r, http.StatusOK, response, nil)
 	if err != nil {
 		app.logger.Println(err)
