@@ -15,9 +15,8 @@ func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	// Router Settings
-	// TODO: Create custom error handling for http errors outside defined handlers->
-	// router.NotFound = ?
-	// router.MethodNotAllowed = ?
+	router.NotFound = http.HandlerFunc(app.notFoundResponse)
+	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	// Routes for application
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
