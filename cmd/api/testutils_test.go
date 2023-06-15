@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"runtime/debug"
 	"testing"
 )
 
@@ -32,6 +34,7 @@ func newTestApp(t *testing.T) *application {
 
 func check(t *testing.T, err error) {
 	if err != nil {
+		fmt.Printf("%q", debug.Stack())
 		t.Fatal(err)
 	}
 }

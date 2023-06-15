@@ -10,7 +10,7 @@ import (
 func (app *application) routes() http.Handler {
 
 	// Middleware chain
-	standardMiddleware := alice.New(app.logRequest, secureHeaders)
+	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
 	router := httprouter.New()
 
