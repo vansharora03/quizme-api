@@ -17,7 +17,7 @@ func (app *application) writeJSON(w http.ResponseWriter, r *http.Request, code i
 		w.Header()[key] = value
 	}
 
-	w.Header().Set("Content Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(body)
 	return nil
