@@ -12,6 +12,9 @@ func (app *application) routes() http.Handler {
 	// Middleware chain
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
+	// dynamic middleware chain for future
+	//dynamicMiddleware := alice.New(nosurf)
+
 	router := httprouter.New()
 
 	// Router Settings
