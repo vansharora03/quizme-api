@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"vanshadhruvp/quizme-api/internal/data"
 
 	_ "github.com/lib/pq"
 )
@@ -27,6 +28,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+    models data.Models
 }
 
 const version = "1.0.0"
@@ -47,16 +49,19 @@ func main() {
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
     // Establish connection to database
-    _, err := openDB(cfg)
+    db, err := openDB(cfg)
     if err != nil {
         logger.Fatal(err)
     }
+    defer db.Close()
+
     logger.Println("Connection to database established.")
 
 	// Prepare app
 	app := &application{
 		config: cfg,
 		logger: logger,
+        models: data.NewModels(db),
 	}
 
 	// Prepare server
