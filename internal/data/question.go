@@ -14,7 +14,7 @@ type Question struct {
     QuizID int64 // The id of the quiz that this question belongs to
     Prompt string // The prompt that is to be answered
     Choices []string // The possible answer choices
-    CorrectAnswer string // The correct answer
+    CorrectIndex int32 // The index at which the correct answer is found
     CreatedAt time.Time // When the question was created
     Version int32 // The version of the question
 }
