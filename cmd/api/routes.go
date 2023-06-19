@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 
 	// Routes for application
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/quiz", app.showAllQuizzes)
+	router.HandlerFunc(http.MethodGet, "/v1/quiz", app.showAllQuizzesHandler)
 
 	return standardMiddleware.Then(router)
 }

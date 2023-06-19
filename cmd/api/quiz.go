@@ -2,6 +2,10 @@ package main
 
 import "net/http"
 
-func (app *application) showAllQuizzes(w http.ResponseWriter, r *http.Request) {
+// showAllQuizzesHandler sends all quizzes in the database in a JSON response to the
+// client
+func (app *application) showAllQuizzesHandler(w http.ResponseWriter, r *http.Request) {
     app.writeJSON(w, r, http.StatusOK, "Showing all quizzes...", nil)
 }
+
+
