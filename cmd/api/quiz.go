@@ -14,4 +14,9 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
     app.writeJSON(w, r, http.StatusOK, "Showing specific quiz...", nil)
 }
 
+// addQuizHandler adds a specific quiz to the database
+func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
+    app.writeJSON(w, r, http.StatusOK, "Adding a quiz...", nil)
+}
+
 
