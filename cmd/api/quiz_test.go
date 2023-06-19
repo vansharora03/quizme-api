@@ -56,3 +56,20 @@ func TestAddQuizHandler(t *testing.T) {
         t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
     }
 }
+
+func TestAddScoreHandler(t *testing.T) {
+    ts := newTestServer(t)
+    defer ts.Close()
+    _, code, body := testPOST[string](t, ts, "/v1/quiz/1/score")
+
+    expectedCode := http.StatusOK
+    expectedBody := "Adding a score..."
+
+    if code != expectedCode {
+        t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
+    }
+
+    if !reflect.DeepEqual(body, expectedBody) {
+        t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
+    }
+}

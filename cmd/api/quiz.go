@@ -19,4 +19,10 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
     app.writeJSON(w, r, http.StatusOK, "Adding a quiz...", nil)
 }
 
+// addScoreHandler receives a json response containing the user's
+// quiz answers and returns the user's score on the quiz.
+func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) {
+    app.writeJSON(w, r, http.StatusOK, "Adding a score...", nil)
+}
+
 
