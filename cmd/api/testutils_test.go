@@ -9,46 +9,11 @@ import (
 	"net/http/httptest"
 	"runtime/debug"
 	"testing"
-	"time"
-	"vanshadhruvp/quizme-api/internal/data"
 )
 
 type testServer struct {
 	app *application
 	*httptest.Server
-}
-
-// Mocks QuizModel
-type TestQuizModel struct {}
-
-// test quiz data
-var quiz1 *data.Quiz =  &data.Quiz{
-        Title: "quiz1",
-        Version: 4,
-        ID: 1,
-        CreatedAt: time.Date(2005, time.April, 5, 1, 2, 3, 0, time.UTC),
-    }
-var quiz2 *data.Quiz = &data.Quiz{
-        Title: "quiz2",
-        Version: 1,
-        ID: 2,
-        CreatedAt: time.Date(2020, time.March, 20, 0, 0, 5, 0, time.UTC),
-    }
-
-// Mocks data.QuizModel.GetAll to test showAllQuizzesHandler
-func (m TestQuizModel) GetAll() ([]*data.Quiz, error) {
-    return []*data.Quiz{quiz1, quiz2}, nil
-}
-
-// Mocks QuestionModel
-type TestQuestionModel struct {}
-
-// Create mock Models
-func newTestModel(t *testing.T) data.Models {
-    return data.Models{
-        Quizzes: TestQuizModel{},
-        Questions: TestQuestionModel{},
-    }
 }
 
 func newTestApp(t *testing.T) *application {
@@ -62,8 +27,6 @@ func newTestApp(t *testing.T) *application {
 		config: cfg,
 		// Create a new logger with the buffer
 		logger: log.New(bytes.NewBuffer(buffer), "", log.Default().Flags()),
-        // Pass in mock models
-        models: newTestModel(t),
 	}
 
 	return testApp
@@ -122,6 +85,7 @@ func openResponse[T any](t *testing.T, ts *testServer, rs *http.Response, urlPat
     body, err := io.ReadAll(rs.Body)
     // Fail test on error
     check(t, err)
+
     var dst T
     rr := httptest.NewRecorder()
     r, err := http.NewRequest("GET", urlPath, bytes.NewBuffer(body))
