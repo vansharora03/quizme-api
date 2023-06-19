@@ -58,18 +58,41 @@ func testGET[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, 
 
 	defer rs.Body.Close()
 
-	// Extract body
-	body, err := io.ReadAll(rs.Body)
-	// Fail test on error
-	check(t, err)
+    return openResponse[T](t, ts, rs, urlPath)
 
-	var dst T
-	rr := httptest.NewRecorder()
-	r, err := http.NewRequest("GET", urlPath, bytes.NewBuffer(body))
-	check(t, err)
-	err = ts.app.readJSON(rr, r, &dst)
-	check(t, err)
+}
 
-	return rs.Header, rs.StatusCode, dst
+//testPOST performs a post request on ts. Returns headers,
+// status code, and body. Initialize the generic to be the type of the json response
+// once converted to a Go value.
+func testPOST[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, int, T) {
+    // Make request
+    rs, err := ts.Client().Post(ts.URL + urlPath, "application/json", bytes.NewBuffer([]byte{}))
+    // Fail test on error
+    check(t, err)
+
+    defer rs.Body.Close()
+
+    return openResponse[T](t, ts, rs, urlPath)
+}
+
+
+// openResponse takes the rs response that contains json data, and attempts to extract
+// the headers, status code, and body as a Go value of type T.
+func openResponse[T any](t *testing.T, ts *testServer, rs *http.Response, urlPath string) (http.Header, int, T) {
+
+    // Extract body
+    body, err := io.ReadAll(rs.Body)
+    // Fail test on error
+    check(t, err)
+
+    var dst T
+    rr := httptest.NewRecorder()
+    r, err := http.NewRequest("GET", urlPath, bytes.NewBuffer(body))
+    check(t, err)
+    err = ts.app.readJSON(rr, r, &dst)
+    check(t, err)
+
+    return rs.Header, rs.StatusCode, dst
 
 }
