@@ -3,8 +3,8 @@ package data
 import "database/sql"
 
 type Models struct {
-    Questions  QuestionModel
-    Quizzes    QuizModel
+    Questions  interface{}
+    Quizzes    interface{ GetAll() ([]*Quiz, error) }
 }
 
 // NewModels initializes a Models struct with
