@@ -1,25 +1,26 @@
 package main
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
-    "net/http"
+	"vanshadhruvp/quizme-api/internal/data"
 )
 
 func TestShowAllQuizzesHandler(t *testing.T) {
     ts := newTestServer(t)
     defer ts.Close()
-    _, code, body := testGET[string](t, ts, "/v1/quiz")
+    _, code, body := testGET[[]*data.Quiz](t, ts, "/v1/quiz")
 
     expectedCode := http.StatusOK
-    expectedBody := "Showing all quizzes..."
+    expectedBody := []*data.Quiz{quiz1, quiz2}
 
     if code != expectedCode {
         t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
     }
 
     if !reflect.DeepEqual(body, expectedBody) {
-        t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
+        t.Fatalf("INCORRECT BODY: expected %v, got %v", expectedBody, body)
     }
 }
 
