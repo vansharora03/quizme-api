@@ -1,35 +1,81 @@
 package main
 
-import "net/http"
-import _ "vanshadhruvp/quizme-api/internal/data"
+import (
+	"fmt"
+	"net/http"
+	_ "vanshadhruvp/quizme-api/internal/data"
+
+	"github.com/julienschmidt/httprouter"
+)
 
 // showAllQuizzesHandler sends all quizzes in the database in a JSON response to the
 // client
 func (app *application) showAllQuizzesHandler(w http.ResponseWriter, r *http.Request) {
-    quizzes, err := app.models.Quizzes.GetAll()
-    if err != nil {
-        app.serverErrorResponse(w, r, err)
-        return
-    }
+	quizzes, err := app.models.Quizzes.GetAll()
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
-    app.writeJSON(w, r, http.StatusOK, quizzes, nil)
+	app.writeJSON(w, r, http.StatusOK, quizzes, nil)
 }
 
 // showQuizHandler sends a specific quiz in the database in a JSON response to the
 // client
 func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) {
-    app.writeJSON(w, r, http.StatusOK, "Showing specific quiz...", nil)
+
+	// Get the id of the quiz from the url
+	params := httprouter.ParamsFromContext(r.Context())
+	quizID := params.ByName("id")
+	// Get the quiz from the database
+	quiz, err := app.models.Quizzes.Get(quizID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, r, http.StatusOK, quiz.Title, nil)
 }
 
 // addQuizHandler adds a specific quiz to the database
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
-    app.writeJSON(w, r, http.StatusOK, "Adding a quiz...", nil)
+	// Check that the request method is POST
+	if r.Method != "POST" {
+		w.Header().Set("Allow", "POST")
+		app.clientError(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Create a struct to hold the quiz data
+	var quiz struct {
+		Title   string `json:"title"`
+		Version string `json:"version"`
+	}
+
+	// Read the json request body into the quiz struct
+	err := app.readJSON(w, r, &quiz)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Add the quiz to the database
+	id, err := app.models.Quizzes.Add(quiz.Title, quiz.Version)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Send the id of the quiz in the response
+	app.writeJSON(w, r, http.StatusCreated, id, nil)
+
+	// Redirect the user to the quiz page
+	http.Redirect(w, r, fmt.Sprintf("/quiz?id=%d", id), http.StatusSeeOther)
+
 }
 
 // addScoreHandler receives a json response containing the user's
 // quiz answers and returns the user's score on the quiz.
 func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) {
-    app.writeJSON(w, r, http.StatusOK, "Adding a score...", nil)
+	app.writeJSON(w, r, http.StatusOK, "Adding a score...", nil)
 }
-
-
