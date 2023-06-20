@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
@@ -38,7 +39,35 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 
 // addQuizHandler adds a specific quiz to the database
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
-	app.writeJSON(w, r, http.StatusOK, "Adding a quiz...", nil)
+	if r.Method != "POST" {
+		w.Header().Set("Allow", "POST")
+		app.clientError(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	var quiz struct {
+		Title   string `json:"title"`
+		Version string `json:"version"`
+	}
+
+	err := app.readJSON(w, r, &quiz)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	id, err := app.models.Quizzes.Add(quiz.Title, quiz.Version)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Send the id of the quiz in the response
+	app.writeJSON(w, r, http.StatusCreated, id, nil)
+
+	// Redirect the user to the quiz page
+	http.Redirect(w, r, fmt.Sprintf("/quiz?id=%d", id), http.StatusSeeOther)
+
 }
 
 // addScoreHandler receives a json response containing the user's
