@@ -44,10 +44,10 @@ func TestShowQuizHandler(t *testing.T) {
 func TestAddQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[string](t, ts, "/v1/quiz")
+	_, code, body := testPOST[int](t, ts, "/v1/quiz")
 
 	expectedCode := http.StatusOK
-	expectedBody := "Adding a quiz..."
+	expectedBody := 123
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
