@@ -77,20 +77,20 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 }
 
 // Add will add a quiz to the database and return the id of the quiz.
-func (m QuizModel) Add(title, version string) (int64, error) {
-	stmt := `INSERT INTO quizme (title, version, created)
-    VALUES($1, $2, CURRENT_TIMESTAMP)`
+func (m QuizModel) Add(title string) (int64, error) {
+	stmt := `INSERT INTO quiz (title)
+    VALUES($1) RETURNING id`
+    
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
 
-	result, err := m.DB.Exec(stmt, title, version)
+	row := m.DB.QueryRowContext(ctx, stmt, title)
 
+    var id int64
+    err := row.Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	// Get the id of the quiz
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
 	return id, nil
 }

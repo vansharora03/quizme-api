@@ -27,10 +27,10 @@ func TestShowAllQuizzesHandler(t *testing.T) {
 func TestShowQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testGET[string](t, ts, "/v1/quiz/1")
+	_, code, body := testGET[*data.Quiz](t, ts, "/v1/quiz/1")
 
 	expectedCode := http.StatusOK
-	expectedBody := "quiz1"
+	expectedBody := quiz1
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
@@ -41,12 +41,12 @@ func TestShowQuizHandler(t *testing.T) {
 	}
 }
 
-/* func TestAddQuizHandler(t *testing.T) {
+ func TestAddQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[int](t, ts, "/v1/quiz")
+    _, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz"}`))
 
-	expectedCode := http.StatusOK
+	expectedCode := http.StatusCreated
 	expectedBody := 123
 
 	if code != expectedCode {
@@ -56,12 +56,12 @@ func TestShowQuizHandler(t *testing.T) {
 	if !reflect.DeepEqual(body, expectedBody) {
 		t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
 	}
-} */
+} 
 
 func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score")
+	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score", []byte{})
 
 	expectedCode := http.StatusOK
 	expectedBody := "Adding a score..."

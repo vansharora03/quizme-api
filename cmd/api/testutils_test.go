@@ -47,14 +47,14 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 		return quiz1, nil
 		// If id is 2, return quiz2
 	} else if id == "2" {
-		return quiz2, nil
+	 	return quiz2, nil
 
 	}
 	return nil, fmt.Errorf("Quiz not found")
 }
 
 // Mocks data.QuizModel.Add to test addQuizHandler
-func (m TestQuizModel) Add(title, version string) (int64, error) {
+func (m TestQuizModel) Add(title string) (int64, error) {
 	return 123, nil
 }
 
@@ -117,12 +117,12 @@ func testGET[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, 
 
 }
 
-// testPOST performs a post request on ts. Returns headers,
+// testPOST performs a post request on ts with the specified json payload. Returns headers,
 // status code, and body. Initialize the generic to be the type of the json response
 // once converted to a Go value.
-func testPOST[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, int, T) {
+func testPOST[T any](t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
 	// Make request
-	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewBuffer([]byte{}))
+	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewBuffer(payload))
 	// Fail test on error
 	check(t, err)
 
