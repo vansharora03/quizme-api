@@ -87,6 +87,7 @@ func (m QuizModel) Add(title, version string) (int64, error) {
 		return 0, err
 	}
 
+	// Get the id of the quiz
 	id, err := result.LastInsertId()
 	if err != nil {
 		return 0, err

@@ -39,23 +39,27 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 
 // addQuizHandler adds a specific quiz to the database
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
+	// Check that the request method is POST
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 
+	// Create a struct to hold the quiz data
 	var quiz struct {
 		Title   string `json:"title"`
 		Version string `json:"version"`
 	}
 
+	// Read the json request body into the quiz struct
 	err := app.readJSON(w, r, &quiz)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
+	// Add the quiz to the database
 	id, err := app.models.Quizzes.Add(quiz.Title, quiz.Version)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
