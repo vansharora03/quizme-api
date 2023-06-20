@@ -75,3 +75,21 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 	// Return the quiz
 	return q, nil
 }
+
+// Add will add a quiz to the database and return the id of the quiz.
+func (m QuizModel) Add(title, version string) (int64, error) {
+	stmt := `INSERT INTO quizme (title, version, created)
+    VALUES($1, $2, CURRENT_TIMESTAMP)`
+
+	result, err := m.DB.Exec(stmt, title, version)
+
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
