@@ -7,6 +7,7 @@ type Models struct {
 	Quizzes   interface {
 		GetAll() ([]*Quiz, error)
 		Get(id string) (*Quiz, error)
+		Add(title, version string) (int64, error)
 	}
 }
 
