@@ -47,14 +47,14 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 		return quiz1, nil
 		// If id is 2, return quiz2
 	} else if id == "2" {
-		return quiz2, nil
+	 	return quiz2, nil
 
 	}
 	return nil, fmt.Errorf("Quiz not found")
 }
 
 // Mocks data.QuizModel.Add to test addQuizHandler
-func (m TestQuizModel) Add(title, version string) (int64, error) {
+func (m TestQuizModel) Add(title string) (int64, error) {
 	return 123, nil
 }
 

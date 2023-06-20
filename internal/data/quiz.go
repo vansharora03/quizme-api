@@ -77,11 +77,11 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 }
 
 // Add will add a quiz to the database and return the id of the quiz.
-func (m QuizModel) Add(title, version string) (int64, error) {
-	stmt := `INSERT INTO quizme (title, version, created)
-    VALUES($1, $2, CURRENT_TIMESTAMP)`
+func (m QuizModel) Add(title string) (int64, error) {
+	stmt := `INSERT INTO quizme (title)
+    VALUES($1)`
 
-	result, err := m.DB.Exec(stmt, title, version)
+	result, err := m.DB.Exec(stmt, title)
 
 	if err != nil {
 		return 0, err

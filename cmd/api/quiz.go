@@ -41,7 +41,6 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a struct to hold the quiz data
 	var quiz struct {
 		Title   string `json:"title"`
-		Version string `json:"version"`
 	}
 
 	// Read the json request body into the quiz struct
@@ -52,7 +51,7 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the quiz to the database
-	id, err := app.models.Quizzes.Add(quiz.Title, quiz.Version)
+	id, err := app.models.Quizzes.Add(quiz.Title)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

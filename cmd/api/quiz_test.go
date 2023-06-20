@@ -44,7 +44,7 @@ func TestShowQuizHandler(t *testing.T) {
  func TestAddQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-    _, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz", "version": "1"}`))
+    _, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz"}`))
 
 	expectedCode := http.StatusCreated
 	expectedBody := 123
