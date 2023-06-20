@@ -33,7 +33,7 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.writeJSON(w, r, http.StatusOK, quiz.Title, nil)
+	app.writeJSON(w, r, http.StatusOK, quiz, nil)
 }
 
 // addQuizHandler adds a specific quiz to the database

@@ -27,10 +27,10 @@ func TestShowAllQuizzesHandler(t *testing.T) {
 func TestShowQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testGET[string](t, ts, "/v1/quiz/1")
+	_, code, body := testGET[*data.Quiz](t, ts, "/v1/quiz/1")
 
 	expectedCode := http.StatusOK
-	expectedBody := "quiz1"
+	expectedBody := quiz1
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
