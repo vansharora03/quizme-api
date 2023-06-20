@@ -22,6 +22,11 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 	app.errorResponse(w, r, http.StatusNotFound, message)
 }
 
+// clientError sends a specific status code to the client and writes the status text
+func (app *application) clientError(w http.ResponseWriter, status int) {
+	http.Error(w, http.StatusText(status), status)
+}
+
 // serverErrorResponse writes an Internal Server Error response and logs err to app
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	message := "The server encountered an error processing the request"
