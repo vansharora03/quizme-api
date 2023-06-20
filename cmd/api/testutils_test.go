@@ -53,6 +53,11 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 	return nil, fmt.Errorf("Quiz not found")
 }
 
+// Mocks data.QuizModel.Add to test addQuizHandler
+func (m TestQuizModel) Add(title, version string) (int64, error) {
+	return 123, nil
+}
+
 // Mocks QuestionModel
 type TestQuestionModel struct{}
 
