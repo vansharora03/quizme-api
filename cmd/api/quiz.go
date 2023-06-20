@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
@@ -28,10 +29,13 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 	quizID := params.ByName("id")
 	// Get the quiz from the database
 	quiz, err := app.models.Quizzes.Get(quizID)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
+	if err == sql.ErrNoRows {
+		app.notFoundResponse(w, r)
 		return
-	}
+	} else if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
 
 	app.writeJSON(w, r, http.StatusOK, quiz, nil)
 }
