@@ -41,12 +41,12 @@ func TestShowQuizHandler(t *testing.T) {
 	}
 }
 
-/* func TestAddQuizHandler(t *testing.T) {
+ func TestAddQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[int](t, ts, "/v1/quiz")
+    _, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz", "version": "1"}`))
 
-	expectedCode := http.StatusOK
+	expectedCode := http.StatusCreated
 	expectedBody := 123
 
 	if code != expectedCode {
@@ -56,12 +56,12 @@ func TestShowQuizHandler(t *testing.T) {
 	if !reflect.DeepEqual(body, expectedBody) {
 		t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
 	}
-} */
+} 
 
 func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score")
+	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score", []byte{})
 
 	expectedCode := http.StatusOK
 	expectedBody := "Adding a score..."
