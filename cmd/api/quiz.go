@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"vanshadhruvp/quizme-api/internal/data"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
 	"github.com/julienschmidt/httprouter"
@@ -27,6 +28,12 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 	// Get the id of the quiz from the url
 	params := httprouter.ParamsFromContext(r.Context())
 	quizID := params.ByName("id")
+    
+    var quizInstance struct {
+        Quiz *data.Quiz 
+        Questions []*data.Question
+    }
+
 	// Get the quiz from the database
 	quiz, err := app.models.Quizzes.Get(quizID)
 	if err == sql.ErrNoRows {
@@ -37,7 +44,18 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
         return
     }
 
-	app.writeJSON(w, r, http.StatusOK, quiz, nil)
+    quizInstance.Quiz = quiz
+
+
+    // Get the questions from the database
+    questions, err := app.models.Questions.GetAllByQuizID(quizID)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+    }
+
+    quizInstance.Questions = questions
+
+	app.writeJSON(w, r, http.StatusOK, quizInstance, nil)
 }
 
 // addQuizHandler adds a specific quiz to the database
