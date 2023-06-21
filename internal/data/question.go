@@ -1,8 +1,11 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type QuestionModel struct {
@@ -17,4 +20,42 @@ type Question struct {
     CorrectIndex int32 // The index at which the correct answer is found
     CreatedAt time.Time // When the question was created
     Version int32 // The version of the question
+}
+
+// GetAllByQuizID returns all questions associated with the quiz with quizID
+func (m QuestionModel) GetAllByQuizID(quizID string) ([]*Question, error) {
+    stmt := `SELECT question.* 
+    FROM quiz 
+    INNER JOIN question ON question.quiz_id = quiz.id
+    WHERE quiz.id = $1`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    rows, err := m.DB.QueryContext(ctx, stmt, quizID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    questions := []*Question{}
+
+    for rows.Next() {
+        question := &Question{}
+
+        err = rows.Scan(&question.ID, &question.QuizID, &question.Prompt, 
+            pq.Array(&question.Choices), &question.CorrectIndex, 
+            &question.CreatedAt, &question.Version)
+        if err != nil {
+            return nil, err
+        }
+        questions = append(questions, question)
+    }
+
+    err = rows.Err()
+    if err != nil {
+        return nil, err
+    }
+
+    return questions, nil
 }

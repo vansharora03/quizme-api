@@ -59,8 +59,13 @@ func (m TestQuizModel) Add(title string) (int64, error) {
 	return 123, nil
 }
 
+
 // Mocks QuestionModel
 type TestQuestionModel struct{}
+
+func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, error) {
+    return []*data.Question{}, nil
+}
 
 // Create mock Models
 func newTestModel(t *testing.T) data.Models {

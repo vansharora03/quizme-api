@@ -3,12 +3,16 @@ package data
 import "database/sql"
 
 type Models struct {
-	Questions interface{}
+	Questions interface{
+        GetAllByQuizID(quizID string) ([]*Question, error)
+    }
+
 	Quizzes   interface {
 		GetAll() ([]*Quiz, error)
 		Get(id string) (*Quiz, error)
 		Add(title string) (int64, error)
 	}
+
 }
 
 // NewModels initializes a Models struct with
