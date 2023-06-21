@@ -37,12 +37,35 @@ func main() {
 	var cfg config
 
 	// Parse command line into cfg
-	flag.StringVar(&cfg.env, "env", "development", "env is the current environment (development|production|staging)")
-	flag.IntVar(&cfg.port, "port", 8080, "port is the address the server is listening on")
-    flag.StringVar(&cfg.db.dsn, "dsn", "", "data source name to connect to postgres")
-    flag.IntVar(&cfg.db.MaxOpenConns, "DB-MaxOpenConns", 25, "maximum number of open connections allowed on db")
-    flag.IntVar(&cfg.db.MaxIdleConns, "DB-MaxIdleConns", 25, "maximum number of idle connections allowed on db")
-	flag.StringVar(&cfg.db.MaxIdleTime, "DB-MaxIdleTime", "15m", "maximum time for idle connections to stay alive")
+	flag.StringVar(
+        &cfg.env, 
+        "env", 
+        "development", 
+        "env is the current environment (development|production|staging)")
+	flag.IntVar(&cfg.port, 
+        "port", 
+        8080, 
+        "port is the address the server is listening on")
+    flag.StringVar(
+        &cfg.db.dsn, 
+        "dsn", 
+        "", 
+        "data source name to connect to postgres")
+    flag.IntVar(
+        &cfg.db.MaxOpenConns, 
+        "DB-MaxOpenConns", 
+         25, 
+        "maximum number of open connections allowed on db")
+    flag.IntVar(
+        &cfg.db.MaxIdleConns, 
+        "DB-MaxIdleConns", 
+        25, 
+        "maximum number of idle connections allowed on db")
+	flag.StringVar(
+        &cfg.db.MaxIdleTime, 
+        "DB-MaxIdleTime", 
+        "15m", 
+        "maximum time for idle connections to stay alive")
 	flag.Parse()
 
 	// Prepare dependencies for app

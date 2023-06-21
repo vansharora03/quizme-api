@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"fmt"
+	"database/sql"
 	"io"
 	"log"
 	"net/http"
@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 	"vanshadhruvp/quizme-api/internal/data"
+    "fmt"
 )
 
 type testServer struct {
@@ -50,7 +51,7 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 	 	return quiz2, nil
 
 	}
-	return nil, fmt.Errorf("Quiz not found")
+	return nil, sql.ErrNoRows
 }
 
 // Mocks data.QuizModel.Add to test addQuizHandler
@@ -120,7 +121,8 @@ func testGET[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, 
 // testPOST performs a post request on ts with the specified json payload. Returns headers,
 // status code, and body. Initialize the generic to be the type of the json response
 // once converted to a Go value.
-func testPOST[T any](t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
+func testPOST[T any](
+    t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
 	// Make request
 	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewBuffer(payload))
 	// Fail test on error
@@ -133,7 +135,8 @@ func testPOST[T any](t *testing.T, ts *testServer, urlPath string, payload []byt
 
 // openResponse takes the rs response that contains json data, and attempts to extract
 // the headers, status code, and body as a Go value of type T.
-func openResponse[T any](t *testing.T, ts *testServer, rs *http.Response, urlPath string) (http.Header, int, T) {
+func openResponse[T any](
+    t *testing.T, ts *testServer, rs *http.Response, urlPath string) (http.Header, int, T) {
 
 	// Extract body
 	body, err := io.ReadAll(rs.Body)
