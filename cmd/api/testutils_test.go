@@ -67,6 +67,10 @@ func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, erro
     return []*data.Question{}, nil
 }
 
+func (m TestQuestionModel) AddQuestion(question *data.Question) error {
+    return nil
+}
+
 // Create mock Models
 func newTestModel(t *testing.T) data.Models {
 	return data.Models{
