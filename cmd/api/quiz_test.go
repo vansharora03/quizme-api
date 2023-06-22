@@ -27,15 +27,15 @@ func TestShowAllQuizzesHandler(t *testing.T) {
 func TestShowQuizHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-    type quizInstance struct {
-        Quiz *data.Quiz
-        Questions []*data.Question
-    }
+	type quizInstance struct {
+		Quiz      *data.Quiz
+		Questions []*data.Question
+	}
 
 	_, code, body := testGET[quizInstance](t, ts, "/v1/quiz/1")
 
 	expectedCode := http.StatusOK
-    expectedBody := quizInstance{Quiz: quiz1, Questions: []*data.Question{}}
+	expectedBody := quizInstance{Quiz: quiz1, Questions: []*data.Question{}}
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
@@ -46,22 +46,26 @@ func TestShowQuizHandler(t *testing.T) {
 	}
 }
 
- func TestAddQuizHandler(t *testing.T) {
-	ts := newTestServer(t)
-	defer ts.Close()
-    _, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz"}`))
+func TestAddQuizHandler(t *testing.T) {
+	t.Run("ValidRequest", func(t *testing.T) {
+		ts := newTestServer(t)
+		defer ts.Close()
+		_, code, body := testPOST[int](t, ts, "/v1/quiz", []byte(`{"title": "quiz"}`))
 
-	expectedCode := http.StatusCreated
-	expectedBody := 123
+		expectedCode := http.StatusCreated
+		expectedBody := 123
 
-	if code != expectedCode {
-		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
-	}
+		if code != expectedCode {
+			t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
+		}
 
-	if !reflect.DeepEqual(body, expectedBody) {
-		t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
-	}
-} 
+		if !reflect.DeepEqual(body, expectedBody) {
+			t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
+		}
+
+	})
+
+}
 
 func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
