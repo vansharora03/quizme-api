@@ -1,10 +1,16 @@
 package data
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
+
+var ErrNoRecords = errors.New("No records found")
 
 type Models struct {
 	Questions interface{
         GetAllByQuizID(quizID string) ([]*Question, error)
+        AddQuestion(question *Question) error 
     }
 
 	Quizzes   interface {
