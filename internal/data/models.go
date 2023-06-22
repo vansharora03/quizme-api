@@ -8,17 +8,16 @@ import (
 var ErrNoRecords = errors.New("No records found")
 
 type Models struct {
-	Questions interface{
-        GetAllByQuizID(quizID string) ([]*Question, error)
-        AddQuestion(question *Question) error 
-    }
-
-	Quizzes   interface {
-		GetAll() ([]*Quiz, error)
-		Get(id string) (*Quiz, error)
-		Add(title string) (int64, error)
+	Questions interface {
+		GetAllByQuizID(quizID string) ([]*Question, error)
+		AddQuestion(question *Question) error
 	}
 
+	Quizzes interface {
+		GetAll() ([]*Quiz, error)
+		Get(id string) (*Quiz, error)
+		Add(title string) (string, error)
+	}
 }
 
 // NewModels initializes a Models struct with
