@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
@@ -88,4 +89,48 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 // quiz answers and returns the user's score on the quiz.
 func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) {
 	app.writeJSON(w, r, http.StatusOK, "Adding a score...", nil)
+}
+
+// addQuestionHandler receives a json response of a question and
+// adds the question to the database, as well as responding to the 
+// client with the added question.
+func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the id of the quiz from the url
+	params := httprouter.ParamsFromContext(r.Context())
+	stringID := params.ByName("id")
+    quizID, err := strconv.ParseInt(stringID, 10, 64)
+    if err != nil {
+        app.notFoundResponse(w, r)
+        return
+    }
+    
+    var input struct {
+        Prompt string
+        Choices []string
+        CorrectIndex int32 `json:"correct_index"`
+    }
+
+    err = app.readJSON(w, r, &input)
+    if err != nil {
+        app.errorResponse(w, r, http.StatusBadRequest, err)
+        return
+    }
+
+    question := data.Question{
+        Prompt: input.Prompt,
+        Choices: input.Choices,
+        QuizID: quizID,
+        CorrectIndex: input.CorrectIndex,
+    }
+    
+    err = app.models.Questions.AddQuestion(&question)
+    if err == data.ErrNoRecords {
+        app.notFoundResponse(w, r)
+        return
+    } else if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
+
+    app.writeJSON(w, r, http.StatusCreated, question, nil)
 }

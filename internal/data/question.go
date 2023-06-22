@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -59,3 +60,41 @@ func (m QuestionModel) GetAllByQuizID(quizID string) ([]*Question, error) {
 
     return questions, nil
 }
+
+// AddQuestion creates a question on the specified quizID and returns the newly created
+// question.
+func (m QuestionModel) AddQuestion(question *Question) error {
+
+    stmt := `INSERT INTO question (prompt, choices, correct_index, quiz_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, version, created_at`
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    row := m.DB.QueryRowContext(
+        ctx, stmt, 
+        question.Prompt, 
+        pq.Array(question.Choices), 
+        question.CorrectIndex, 
+        question.QuizID)
+
+    err := row.Scan(&question.ID, &question.Version, &question.CreatedAt)
+    if err != nil {
+        if strings.Contains(err.Error(), "foreign key") {
+            return ErrNoRecords
+        } else {
+        return err
+        }
+    }
+
+    return nil
+}
+
+
+
+
+
+
+
+
+
