@@ -74,19 +74,18 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// create validator
 	v := validator.New()
 
 	// Validate the quiz struct
 	err = v.Struct(quiz)
 
 	if err != nil {
+		// Print the errors to the console
 		for _, e := range err.(validator.ValidationErrors) {
 			fmt.Println(e)
 		}
-		if _, ok := err.(*validator.InvalidValidationError); ok {
-			fmt.Println(err)
-			return
-		}
+		app.serverErrorResponse(w, r, err)
 
 	}
 
@@ -122,15 +121,29 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var input struct {
-		Prompt       string
-		Choices      []string
-		CorrectIndex int32 `json:"correct_index"`
+		Prompt       string   `json:"prompt" validate:"required,prompt"`
+		Choices      []string `json:"choices" validate:"required,choices"`
+		CorrectIndex int32    `json:"correct_index" validate:"required,correct_index"`
 	}
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusBadRequest, err)
 		return
+	}
+
+	// create validator
+	v := validator.New()
+
+	// Validate the quiz struct
+	err = v.Struct(input)
+
+	if err != nil {
+		// Print the errors to the console
+		for _, e := range err.(validator.ValidationErrors) {
+			fmt.Println(e)
+		}
+		app.serverErrorResponse(w, r, err)
 	}
 
 	question := data.Question{
