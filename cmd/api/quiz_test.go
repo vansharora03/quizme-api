@@ -47,6 +47,7 @@ func TestShowQuizHandler(t *testing.T) {
 }
 
 func TestAddQuizHandler(t *testing.T) {
+	// Test valid quiz request
 	t.Run("ValidRequest", func(t *testing.T) {
 		ts := newTestServer(t)
 		defer ts.Close()
@@ -65,10 +66,39 @@ func TestAddQuizHandler(t *testing.T) {
 
 	})
 
+	// Test for an invalid quiz request
 	t.Run("InvalidRequest", func(t *testing.T) {
 		ts := newTestServer(t)
 		defer ts.Close()
 		_, code, _ := testPOST[string](t, ts, "/v1/quiz", []byte(`{"title": ""}`))
+		expectedCode := http.StatusInternalServerError
+
+		if code != expectedCode {
+			t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
+		}
+	})
+
+}
+
+func TestAddQuestionHandler(t *testing.T) {
+	// Test for a valid question request
+	// t.Run("ValidQuestionRequest", func(t *testing.T) {
+	// 	ts := newTestServer(t)
+	// 	defer ts.Close()
+	// 	_, code, _ := testPOST[string](t, ts, "/v1/quiz/1/question", []byte(`{"prompt": "quiz", "choices": ["a", "b", "c"], "correct_index": 0}`))
+
+	// 	expectedCode := http.StatusCreated
+
+	// 	if code != expectedCode {
+	// 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
+	// 	}
+	// })
+
+	// Test for an invalid question request
+	t.Run("InvalidQuestionRequest", func(t *testing.T) {
+		ts := newTestServer(t)
+		defer ts.Close()
+		_, code, _ := testPOST[string](t, ts, "/v1/quiz/1/question", []byte(`{"prompt" : ""}`))
 		expectedCode := http.StatusInternalServerError
 
 		if code != expectedCode {
