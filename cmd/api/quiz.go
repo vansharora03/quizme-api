@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
 	"github.com/julienschmidt/httprouter"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // showAllQuizzesHandler sends all quizzes in the database in a JSON response to the
@@ -29,11 +31,11 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 	// Get the id of the quiz from the url
 	params := httprouter.ParamsFromContext(r.Context())
 	quizID := params.ByName("id")
-    
-    var quizInstance struct {
-        Quiz *data.Quiz 
-        Questions []*data.Question
-    }
+
+	var quizInstance struct {
+		Quiz      *data.Quiz
+		Questions []*data.Question
+	}
 
 	// Get the quiz from the database
 	quiz, err := app.models.Quizzes.Get(quizID)
@@ -41,20 +43,19 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 		app.notFoundResponse(w, r)
 		return
 	} else if err != nil {
-        app.serverErrorResponse(w, r, err)
-        return
-    }
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
-    quizInstance.Quiz = quiz
+	quizInstance.Quiz = quiz
 
+	// Get the questions from the database
+	questions, err := app.models.Questions.GetAllByQuizID(quizID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 
-    // Get the questions from the database
-    questions, err := app.models.Questions.GetAllByQuizID(quizID)
-    if err != nil {
-        app.serverErrorResponse(w, r, err)
-    }
-
-    quizInstance.Questions = questions
+	quizInstance.Questions = questions
 
 	app.writeJSON(w, r, http.StatusOK, quizInstance, nil)
 }
@@ -63,7 +64,7 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a struct to hold the quiz data
 	var quiz struct {
-		Title   string `json:"title"`
+		Title string `json:"title" validate:"required"`
 	}
 
 	// Read the json request body into the quiz struct
@@ -73,15 +74,31 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	v := validator.New()
+
+	// Validate the quiz struct
+	err = v.Struct(quiz)
+
+	if err != nil {
+		for _, e := range err.(validator.ValidationErrors) {
+			fmt.Println(e)
+		}
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			fmt.Println(err)
+			return
+		}
+
+	}
+
 	// Add the quiz to the database
-	id, err := app.models.Quizzes.Add(quiz.Title)
+	title, err := app.models.Quizzes.Add(quiz.Title)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	// Send the id of the quiz in the response
-	app.writeJSON(w, r, http.StatusCreated, id, nil)
+	app.writeJSON(w, r, http.StatusCreated, title, nil)
 
 }
 
@@ -92,45 +109,45 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 // addQuestionHandler receives a json response of a question and
-// adds the question to the database, as well as responding to the 
+// adds the question to the database, as well as responding to the
 // client with the added question.
 func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the id of the quiz from the url
 	params := httprouter.ParamsFromContext(r.Context())
 	stringID := params.ByName("id")
-    quizID, err := strconv.ParseInt(stringID, 10, 64)
-    if err != nil {
-        app.notFoundResponse(w, r)
-        return
-    }
-    
-    var input struct {
-        Prompt string
-        Choices []string
-        CorrectIndex int32 `json:"correct_index"`
-    }
+	quizID, err := strconv.ParseInt(stringID, 10, 64)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
 
-    err = app.readJSON(w, r, &input)
-    if err != nil {
-        app.errorResponse(w, r, http.StatusBadRequest, err)
-        return
-    }
+	var input struct {
+		Prompt       string
+		Choices      []string
+		CorrectIndex int32 `json:"correct_index"`
+	}
 
-    question := data.Question{
-        Prompt: input.Prompt,
-        Choices: input.Choices,
-        QuizID: quizID,
-        CorrectIndex: input.CorrectIndex,
-    }
-    
-    err = app.models.Questions.AddQuestion(&question)
-    if err == data.ErrNoRecords {
-        app.notFoundResponse(w, r)
-        return
-    } else if err != nil {
-        app.serverErrorResponse(w, r, err)
-        return
-    }
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err)
+		return
+	}
 
-    app.writeJSON(w, r, http.StatusCreated, question, nil)
+	question := data.Question{
+		Prompt:       input.Prompt,
+		Choices:      input.Choices,
+		QuizID:       quizID,
+		CorrectIndex: input.CorrectIndex,
+	}
+
+	err = app.models.Questions.AddQuestion(&question)
+	if err == data.ErrNoRecords {
+		app.notFoundResponse(w, r)
+		return
+	} else if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, r, http.StatusCreated, question, nil)
 }
