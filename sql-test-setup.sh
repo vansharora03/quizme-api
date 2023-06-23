@@ -1,0 +1,7 @@
+#!/bin/sh
+
+psql -U quizme  -h localhost -d quizmetest -f sql-setup/setup/quiz_table.sql
+psql -U quizme  -h localhost -d quizmetest -f sql-setup/setup/question_table.sql
+psql -U quizme  -h localhost -d quizmetest -f sql-test-setup/insert_quiz1.sql
+psql -U quizme  -h localhost -d quizmetest -f sql-test-setup/insert_quiz2.sql
+
