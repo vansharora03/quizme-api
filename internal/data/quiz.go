@@ -69,6 +69,9 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 	err := row.Scan(&q.ID, &q.CreatedAt, &q.Version, &q.Title)
 
 	if err != nil {
+        if err == sql.ErrNoRows {
+            return nil, ErrNoRecords
+        }
 		return nil, err
 	}
 
