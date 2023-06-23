@@ -122,7 +122,9 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := validator.ValidateQuestion(data.Question{Prompt: input.Prompt, Choices: input.Choices, CorrectIndex: input.CorrectIndex}); err != nil {
+	if err := validator.ValidateQuestion(
+        data.Question{Prompt: input.Prompt, Choices: input.Choices, CorrectIndex: input.CorrectIndex}); 
+        err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}

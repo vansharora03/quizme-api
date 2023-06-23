@@ -54,3 +54,35 @@ func TestGet(t *testing.T) {
         })
     }
 }
+
+func TestAdd(t *testing.T) {
+    quizModel := QuizModel{openTestDB(t)}
+
+    title := "quiz3test";
+
+    quizModel.Add(title);
+
+    stmt := `SELECT title FROM quiz WHERE title = $1`
+
+    row := quizModel.DB.QueryRow(stmt, title)
+
+    var gotTitle string;
+
+    err := row.Scan(&gotTitle)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if gotTitle != title {
+        t.Fatalf("INCORRECT ENTRY TITLE: expected %q, got %q", title, gotTitle)
+    }
+
+}
+
+
+
+
+
+
+
+
