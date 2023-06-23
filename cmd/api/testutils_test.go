@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"testing"
 	"time"
 	"vanshadhruvp/quizme-api/internal/data"
-    "fmt"
 )
 
 type testServer struct {
@@ -48,27 +48,26 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 		return quiz1, nil
 		// If id is 2, return quiz2
 	} else if id == "2" {
-	 	return quiz2, nil
+		return quiz2, nil
 
 	}
 	return nil, sql.ErrNoRows
 }
 
 // Mocks data.QuizModel.Add to test addQuizHandler
-func (m TestQuizModel) Add(title string) (int64, error) {
-	return 123, nil
+func (m TestQuizModel) Add(title string) (string, error) {
+	return "quiz", nil
 }
-
 
 // Mocks QuestionModel
 type TestQuestionModel struct{}
 
 func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, error) {
-    return []*data.Question{}, nil
+	return []*data.Question{}, nil
 }
 
 func (m TestQuestionModel) AddQuestion(question *data.Question) error {
-    return nil
+	return nil
 }
 
 // Create mock Models
@@ -131,7 +130,7 @@ func testGET[T any](t *testing.T, ts *testServer, urlPath string) (http.Header, 
 // status code, and body. Initialize the generic to be the type of the json response
 // once converted to a Go value.
 func testPOST[T any](
-    t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
+	t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
 	// Make request
 	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewBuffer(payload))
 	// Fail test on error
@@ -145,7 +144,7 @@ func testPOST[T any](
 // openResponse takes the rs response that contains json data, and attempts to extract
 // the headers, status code, and body as a Go value of type T.
 func openResponse[T any](
-    t *testing.T, ts *testServer, rs *http.Response, urlPath string) (http.Header, int, T) {
+	t *testing.T, ts *testServer, rs *http.Response, urlPath string) (http.Header, int, T) {
 
 	// Extract body
 	body, err := io.ReadAll(rs.Body)

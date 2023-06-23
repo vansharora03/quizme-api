@@ -80,20 +80,19 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 }
 
 // Add will add a quiz to the database and return the id of the quiz.
-func (m QuizModel) Add(title string) (int64, error) {
+func (m QuizModel) Add(title string) (string, error) {
 	stmt := `INSERT INTO quiz (title)
-    VALUES($1) RETURNING id`
-    
-    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
-    defer cancel()
+    VALUES($1) RETURNING title`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	row := m.DB.QueryRowContext(ctx, stmt, title)
 
-    var id int64
-    err := row.Scan(&id)
+	err := row.Scan(&title)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return title, nil
 }
