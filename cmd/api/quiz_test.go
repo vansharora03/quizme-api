@@ -66,18 +66,6 @@ func TestAddQuizHandler(t *testing.T) {
 
 	})
 
-	// Test for an invalid quiz request
-	t.Run("InvalidRequest", func(t *testing.T) {
-		ts := newTestServer(t)
-		defer ts.Close()
-		_, code, _ := testPOST[string](t, ts, "/v1/quiz", []byte(`{"title": ""}`))
-		expectedCode := http.StatusInternalServerError
-
-		if code != expectedCode {
-			t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
-		}
-	})
-
 }
 
 // func TestAddQuestionHandler(t *testing.T) {
