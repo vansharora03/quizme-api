@@ -2,14 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
 	_ "vanshadhruvp/quizme-api/internal/data"
 
+	"vanshadhruvp/quizme-api/internal/validator"
+
 	"github.com/julienschmidt/httprouter"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // showAllQuizzesHandler sends all quizzes in the database in a JSON response to the
@@ -64,7 +64,7 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a struct to hold the quiz data
 	var quiz struct {
-		Title string `json:"title" validate:"required"`
+		Title string `json:"title"`
 	}
 
 	// Read the json request body into the quiz struct
@@ -74,19 +74,9 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create validator
-	v := validator.New()
-
-	// Validate the quiz struct
-	err = v.Struct(quiz)
-
-	if err != nil {
-		// Print the errors to the console
-		for _, e := range err.(validator.ValidationErrors) {
-			fmt.Println(e)
-		}
-		app.serverErrorResponse(w, r, err)
-
+	if err := validator.ValidateQuiz(data.Quiz{Title: quiz.Title}); err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	// Add the quiz to the database
@@ -130,20 +120,6 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.errorResponse(w, r, http.StatusBadRequest, err)
 		return
-	}
-
-	// create validator
-	v := validator.New()
-
-	// Validate the quiz struct
-	err = v.Struct(input)
-
-	if err != nil {
-		// Print the errors to the console
-		for _, e := range err.(validator.ValidationErrors) {
-			fmt.Println(e)
-		}
-		app.serverErrorResponse(w, r, err)
 	}
 
 	question := data.Question{
