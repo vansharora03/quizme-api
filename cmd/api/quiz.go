@@ -111,14 +111,19 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	var input struct {
-		Prompt       string   `json:"prompt" validate:"required,prompt"`
-		Choices      []string `json:"choices" validate:"required,choices"`
-		CorrectIndex int32    `json:"correct_index" validate:"required,correct_index"`
+		Prompt       string   `json:"prompt"`
+		Choices      []string `json:"choices"`
+		CorrectIndex int32    `json:"correct_index"`
 	}
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.errorResponse(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := validator.ValidateQuestion(data.Question{Prompt: input.Prompt, Choices: input.Choices, CorrectIndex: input.CorrectIndex}); err != nil {
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
