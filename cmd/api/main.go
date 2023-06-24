@@ -23,6 +23,11 @@ type config struct {
         MaxIdleConns int
         MaxIdleTime string 
     }
+    limiter struct {
+        rps float64
+        burst int
+        enabled bool
+    }
 }
 
 type application struct {
@@ -66,6 +71,21 @@ func main() {
         "DB-MaxIdleTime", 
         "15m", 
         "maximum time for idle connections to stay alive")
+	flag.IntVar(
+        &cfg.limiter.burst,
+        "Limiter-burst", 
+        4, 
+        "Rate limiter maximum burst")
+	flag.Float64Var(
+        &cfg.limiter.rps, 
+        "Limiter-rps", 
+        2, 
+        "Rate limiter maximum requests per second")
+	flag.BoolVar(
+        &cfg.limiter.enabled,
+        "Limiter-enabled", 
+        true, 
+        "Enable rate limiter")
 	flag.Parse()
 
 	// Prepare dependencies for app
