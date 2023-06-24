@@ -9,3 +9,5 @@ require (
 	github.com/justinas/nosurf v1.1.1
 	github.com/lib/pq v1.10.9
 )
+
+require golang.org/x/time v0.3.0 // indirect
