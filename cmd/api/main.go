@@ -4,9 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 	"vanshadhruvp/quizme-api/internal/data"
@@ -107,18 +105,8 @@ func main() {
         models: data.NewModels(db),
 	}
 
-	// Prepare server
-	srv := http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-
-	// Start server
-	logger.Printf("Starting %s server on port %s", cfg.env, srv.Addr)
-	err = srv.ListenAndServe()
+    // Start server
+    err = app.serve()
 	if err != nil {
 		logger.Fatal(err)
 	}
