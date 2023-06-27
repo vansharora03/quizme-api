@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
@@ -39,7 +38,7 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 
 	// Get the quiz from the database
 	quiz, err := app.models.Quizzes.Get(quizID)
-	if err == sql.ErrNoRows {
+	if err == data.ErrNoRecords {
 		app.notFoundResponse(w, r)
 		return
 	} else if err != nil {
