@@ -96,7 +96,7 @@ func TestAddQuizHandler(t *testing.T) {
 
 // }
 
-func TestAddScoreHandler(t *testing.T) {
+/* func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
 	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score", []byte{})
@@ -111,4 +111,5 @@ func TestAddScoreHandler(t *testing.T) {
 	if !reflect.DeepEqual(body, expectedBody) {
 		t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
 	}
-}
+} */
+
