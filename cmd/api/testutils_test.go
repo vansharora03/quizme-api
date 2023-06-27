@@ -62,7 +62,30 @@ func (m TestQuizModel) Add(title string) (string, error) {
 // Mocks QuestionModel
 type TestQuestionModel struct{}
 
+var question1 data.Question = data.Question{
+    ID: 1,
+    Version: 1,
+    CreatedAt: time.Now(),
+    Prompt: "testq1",
+    Choices: []string{"a", "b", "c"},
+    CorrectIndex: 1,
+    QuizID: 1,
+}
+
+var question2 data.Question = data.Question{
+    ID: 1,
+    Version: 1,
+    CreatedAt: time.Now(),
+    Prompt: "testq1",
+    Choices: []string{"a", "b", "c"},
+    CorrectIndex: 0,
+    QuizID: 1,
+}
+
 func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, error) {
+    if quizID == "1" {
+        return []*data.Question{&question1, &question2}, nil
+    }
 	return []*data.Question{}, nil
 }
 
