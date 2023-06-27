@@ -161,6 +161,11 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
         app.serverErrorResponse(w, r, err)
         return
     }
+    // return NotFound if questions is empty
+    if len(questions) == 0 {
+        app.notFoundResponse(w, r)
+        return
+    }
 
     correct := 0
     for i, question := range questions {
