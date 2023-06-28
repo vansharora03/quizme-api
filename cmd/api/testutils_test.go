@@ -65,7 +65,6 @@ type TestQuestionModel struct{}
 var question1 data.Question = data.Question{
     ID: 1,
     Version: 1,
-    CreatedAt: time.Now(),
     Prompt: "testq1",
     Choices: []string{"a", "b", "c"},
     CorrectIndex: 1,
@@ -75,7 +74,6 @@ var question1 data.Question = data.Question{
 var question2 data.Question = data.Question{
     ID: 1,
     Version: 1,
-    CreatedAt: time.Now(),
     Prompt: "testq1",
     Choices: []string{"a", "b", "c"},
     CorrectIndex: 0,
