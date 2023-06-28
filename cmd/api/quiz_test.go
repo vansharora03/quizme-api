@@ -20,7 +20,7 @@ func TestShowAllQuizzesHandler(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(body, expectedBody) {
-		t.Fatalf("INCORRECT BODY: expected %v, got %v", expectedBody, body)
+		t.Fatalf("INCORRECT BODY: expected %+v, got %+v", expectedBody, body)
 	}
 }
 
@@ -35,15 +35,29 @@ func TestShowQuizHandler(t *testing.T) {
 	_, code, body := testGET[quizInstance](t, ts, "/v1/quiz/1")
 
 	expectedCode := http.StatusOK
-	expectedBody := quizInstance{Quiz: quiz1, Questions: []*data.Question{}}
+    expectedBody := quizInstance{Quiz: quiz1, Questions: []*data.Question{&question1, &question2,}}
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
 	}
 
-	if !reflect.DeepEqual(body, expectedBody) {
-		t.Fatalf("INCORRECT BODY: expected %v, got %v", expectedBody, body)
+	if !reflect.DeepEqual(body.Quiz, expectedBody.Quiz) {
+		t.Fatalf("INCORRECT BODY: expected %+v, got %+v", expectedBody, body)
 	}
+
+    if len(body.Questions) != len(expectedBody.Questions) {
+        t.Fatalf("INCORRECT ENTRY QUESTIONS LENGTH: expected %d, got %d", 
+            len(expectedBody.Questions), len(body.Questions))
+    }
+
+    for i, question := range body.Questions {
+        expectedQuestion := expectedBody.Questions[i]
+        if !reflect.DeepEqual(*question, *expectedQuestion) {
+            t.Fatalf("INCORRECT ENTRY QUESTION: expected %v, got %v",
+                *expectedQuestion, *question)
+        }
+    }
+    
 }
 
 func TestAddQuizHandler(t *testing.T) {
@@ -96,20 +110,20 @@ func TestAddQuizHandler(t *testing.T) {
 
 // }
 
-/* func TestAddScoreHandler(t *testing.T) {
+func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
 	defer ts.Close()
-	_, code, body := testPOST[string](t, ts, "/v1/quiz/1/score", []byte{})
+    _, code, body := testPOST[int32](t, ts, "/v1/quiz/1/score", []byte(`{"answers": [1, 2]}`))
 
 	expectedCode := http.StatusOK
-	expectedBody := "Adding a score..."
+	expectedBody := int32(50) 
 
 	if code != expectedCode {
 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
 	}
 
 	if !reflect.DeepEqual(body, expectedBody) {
-		t.Fatalf("INCORRECT BODY: expected %q, got %q", expectedBody, body)
+		t.Fatalf("INCORRECT BODY: expected %d, got %d", expectedBody, body)
 	}
-} */
+} 
 
