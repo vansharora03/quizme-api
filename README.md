@@ -7,7 +7,7 @@ RESTful API for QuizMe.
 - GET -> `/v1/quiz` : displays all quizzes in a list (no questions; sorting and filtering soon)
 - GET -> `/v1/quiz/:id` : displays information about a specific quiz (yes questions)
 - POST -> `/v1/quiz` : add a quiz to database, all you need to supply is json object with a `title string` field
-- POST -> `/v1/quiz/:id/score` : will return your score back to you as an integer in [0,100], user must supply an array of integers, each representing the index of the chosen answer
+- POST -> `/v1/quiz/:id/score` : will return your score back to you as an integer in [0,100], user must supply a json object `{ "answers" : int[] }`, each integer representing the index of the chosen answer.
 - POST -> `/v1/quiz/:id/question` : post a question to the specified quiz, must supply json object with: `prompt string, choices string[], correct_index integer`
 ## To run the server do the following:
 1. Set up psql with a `quizme` database
