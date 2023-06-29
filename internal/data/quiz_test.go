@@ -1,6 +1,9 @@
 package data
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestGetAll(t *testing.T) {
     quizModel := QuizModel{openTestDB(t)}
@@ -75,6 +78,35 @@ func TestAdd(t *testing.T) {
 
     if gotTitle != title {
         t.Fatalf("INCORRECT ENTRY TITLE: expected %q, got %q", title, gotTitle)
+    }
+
+}
+
+func TestUpdate(t *testing.T) {
+    quizmodel := QuizModel{openTestDB(t)}
+
+    newQuiz := Quiz{
+        Title: "changedquiz",
+        Version: 1,
+        ID: 1,
+    }
+
+    err := quizmodel.Update(&newQuiz)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    q, err := quizmodel.Get(fmt.Sprintf("%d", newQuiz.ID))
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if q.Version != newQuiz.Version {
+        t.Fatalf("INCORRECT VERSION: expected %d, got %d", newQuiz.Version, q.Version)
+    }
+
+    if q.Title != newQuiz.Title {
+        t.Fatalf("INCORRECT VERSION: expected %q, got %q", newQuiz.Title, q.Title)
     }
 
 }
