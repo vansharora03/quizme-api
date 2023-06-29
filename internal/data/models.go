@@ -6,6 +6,7 @@ import (
 )
 
 var ErrNoRecords = errors.New("No records found")
+var ErrEditConflict = errors.New("Edit conflict")
 
 type Models struct {
 	Questions interface {
