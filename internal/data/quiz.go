@@ -12,10 +12,10 @@ type QuizModel struct {
 }
 
 type Quiz struct {
-	ID        int64     // ID
-	CreatedAt time.Time // When the quiz was created
-	Version   int32     // Version of the quiz
-	Title     string    // Title of the quiz
+    ID        int64 `json:"id"` // ID
+	CreatedAt time.Time `json:"created_at"` // When the quiz was created
+	Version   int32 `json:"version"` // Version of the quiz
+	Title     string `json:"title"` // Title of the quiz
 }
 
 // GetAll will get all quizzes in the database and return them.

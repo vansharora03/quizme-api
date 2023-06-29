@@ -32,8 +32,8 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 	quizID := params.ByName("id")
 
 	var quizInstance struct {
-		Quiz      *data.Quiz
-		Questions []*data.Question
+        Quiz      *data.Quiz `json:"quiz"`
+        Questions []*data.Question `json:"questions"`
 	}
 
 	// Get the quiz from the database
@@ -147,7 +147,7 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
     params := httprouter.ParamsFromContext(r.Context())
     id := params.ByName("id")
     var input struct {
-        Answers []int32
+        Answers []int32 `json:"answers"`
     }
 
     err := app.readJSON(w, r, &input)
