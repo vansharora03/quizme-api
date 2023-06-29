@@ -14,13 +14,13 @@ type QuestionModel struct {
 }
 
 type Question struct {
-    ID int64 // ID
-    QuizID int64 // The id of the quiz that this question belongs to
-    Prompt string // The prompt that is to be answered
-    Choices []string // The possible answer choices
-    CorrectIndex int32 // The index at which the correct answer is found
-    CreatedAt time.Time // When the question was created
-    Version int32 // The version of the question
+    ID int64 `json:"id"` // ID
+    QuizID int64 `json:"quiz_id"` // The id of the quiz that this question belongs to
+    Prompt string  `json:"prompt"` /// The prompt that is to be answered
+    Choices []string  `json:"choices"` /// The possible answer choices
+    CorrectIndex int32  `json:"correct_index"` /// The index at which the correct answer is found
+    CreatedAt time.Time  `json:"created_at"` /// When the question was created
+    Version int32  `json:"version"` /// The version of the question
 }
 
 // GetAllByQuizID returns all questions associated with the quiz with quizID
