@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -96,3 +97,46 @@ func (m QuizModel) Add(title string) (string, error) {
 
 	return title, nil
 }
+
+
+
+
+// Update will update a quiz in the database
+func (m QuizModel) Update(quiz *Quiz) error {
+    stmt := `UPDATE quiz
+    SET title = $1, version = version + 1
+    WHERE id = $2 AND version = $3
+    RETURNING version`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    err := m.DB.QueryRowContext(ctx, stmt, 
+        quiz.Title, 
+        quiz.ID, 
+        quiz.Version).Scan(&quiz.Version)
+    
+    if err != nil {
+        switch {
+        case errors.Is(err, sql.ErrNoRows):
+            return ErrEditConflict
+        default:
+            return err
+        }
+    }
+
+    return nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
