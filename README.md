@@ -10,6 +10,7 @@ RESTful API for QuizMe.
 - PUT -> `/v1/quiz/:id` : update a quiz in a database, must supply a json object with `title string` and a valid `version int`
 - POST -> `/v1/quiz/:id/score` : will return your score back to you as an integer in [0,100], user must supply a json object `{ "answers" : int[] }`, each integer representing the index of the chosen answer.
 - POST -> `/v1/quiz/:id/question` : post a question to the specified quiz, must supply json object with: `prompt string, choices string[], correct_index integer`
+- PUT -> `/v1/quiz/:id/question/:questionID` : update a question, must supply json object with: `prompt, choices, correct_index, version`
 ## To run the server do the following:
 1. Set up psql with a `quizme` database
 2. Set up a user `quizme` with a password and save this password to env variable `PGPASSWORD`
