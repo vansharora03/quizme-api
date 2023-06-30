@@ -206,7 +206,7 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
     if err != nil {
         switch {
         case err == data.ErrEditConflict:
-            app.errorResponse(w, r, http.StatusConflict, err)
+            app.errorResponse(w, r, http.StatusConflict, "Please try again")
             return
         default:
             app.serverErrorResponse(w, r, err)

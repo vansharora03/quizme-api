@@ -59,6 +59,11 @@ func (m TestQuizModel) Add(title string) (string, error) {
 	return "quiz", nil
 }
 
+// Mocks data.QuizModel.Update
+func (m TestQuizModel) Update(quiz *data.Quiz) error {
+    return nil
+}
+
 // Mocks QuestionModel
 type TestQuestionModel struct{}
 
