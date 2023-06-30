@@ -218,7 +218,38 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
 }
         
 
+// updateQuestionHandler receives an updated question from the user and updates the
+// question in the database
+func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Request) {
+    params := httprouter.ParamsFromContext(r.Context())
+    quizID, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+    questionID, err := strconv.ParseInt(params.ByName("questionID"), 10, 64)
+    if err != nil {
+        app.notFoundResponse(w, r)
+        return
+    }
 
+    var input data.Question
+    input.ID = questionID
+    input.QuizID = quizID
+
+    err = app.readJSON(w, r, &input)
+
+    err = app.models.Questions.Update(&input)
+    if err != nil {
+        switch {
+        case err == data.ErrEditConflict:
+            app.errorResponse(w, r, http.StatusConflict, "Please try again")
+            return
+        default:
+            app.serverErrorResponse(w, r, err)
+            return
+        }
+    }
+
+    app.writeJSON(w, r, http.StatusOK, input, nil)
+
+}
 
 
 

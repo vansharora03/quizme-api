@@ -90,7 +90,31 @@ func (m QuestionModel) AddQuestion(question *Question) error {
     return nil
 }
 
+// Update updates the specified question
+func (m QuestionModel) Update(question *Question) error {
+    stmt := `UPDATE question 
+    SET prompt = $1, choices = $2, correct_index = $3, version = version + 1
+    WHERE id = $4 AND version = $5
+    RETURNING version`
 
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    err := m.DB.QueryRowContext(ctx, stmt,
+        question.Prompt, pq.Array(question.Choices), question.CorrectIndex, question.ID, 
+        question.Version).Scan(&question.Version)
+    if err != nil {
+        switch {
+        case err == sql.ErrNoRows:
+            return ErrEditConflict
+        default:
+            return err
+        }
+    }
+
+    return nil
+}
+                    
 
 
 

@@ -92,3 +92,61 @@ func TestAddQuestion(t *testing.T) {
 
 
 }
+
+
+func TestUpdateQuestion(t *testing.T) {
+    questionModel := QuestionModel{openTestDB(t)}
+    
+    q := Question{
+        Prompt: "updated",
+        ID: 1,
+        Version: 1,
+        Choices: []string{"up", "date", "d"},
+        CorrectIndex: 2,
+    }
+
+    err := questionModel.Update(&q)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if q.Version != 2 {
+        t.Fatalf("INCORRECT VERSION: expected %d, got %d", 2, q.Version)
+    }
+
+    stmt := `SELECT prompt, choices, correct_index
+    FROM question
+    WHERE id = $1`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    var gotQ Question
+
+    err = questionModel.DB.QueryRowContext(ctx, stmt, q.ID).Scan(
+        &gotQ.Prompt, pq.Array(&gotQ.Choices), &gotQ.CorrectIndex)
+
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    if gotQ.Prompt != q.Prompt {
+        t.Fatalf("INCORRECT ENTRY PROMPT: expected %q, got %q", q.Prompt, gotQ.Prompt)
+    }
+
+    if !reflect.DeepEqual(q.Choices, gotQ.Choices) {
+        t.Fatalf("INCORRECT ENTRY PROMPT: expected %v, got %v", q.Choices, gotQ.Choices)
+    }
+
+    if gotQ.CorrectIndex != q.CorrectIndex {
+        t.Fatalf("INCORRECT ENTRY PROMPT: expected %d, got %d", q.CorrectIndex, gotQ.CorrectIndex)
+    }
+}
+
+
+
+
+
+
+
+
