@@ -18,6 +18,7 @@ type Models struct {
 		GetAll() ([]*Quiz, error)
 		Get(id string) (*Quiz, error)
 		Add(title string) (string, error)
+        Update(quiz *Quiz) error
 	}
 }
 
