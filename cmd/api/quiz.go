@@ -181,3 +181,58 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
         app.serverErrorResponse(w, r, err)
     }
 }
+
+
+
+// updateQuizHandler receives a quiz from the json request and 
+// updates the corresponding quiz in the database
+func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request) {
+    params := httprouter.ParamsFromContext(r.Context())
+    id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+    if err != nil {
+        app.notFoundResponse(w, r)
+        return
+    }
+
+    var input data.Quiz
+    input.ID = id
+
+    err = app.readJSON(w, r, &input)
+    if err != nil {
+        app.errorResponse(w, r, http.StatusBadRequest, err)
+    }
+
+    err = app.models.Quizzes.Update(&input)
+    if err != nil {
+        switch {
+        case err == data.ErrEditConflict:
+            app.errorResponse(w, r, http.StatusConflict, "Please try again")
+            return
+        default:
+            app.serverErrorResponse(w, r, err)
+            return
+        }
+    }
+
+    app.writeJSON(w, r, http.StatusOK, input, nil)
+}
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
