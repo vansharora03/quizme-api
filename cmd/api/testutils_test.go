@@ -96,6 +96,10 @@ func (m TestQuestionModel) AddQuestion(question *data.Question) error {
 	return nil
 }
 
+func (m TestQuestionModel) Update(question *data.Question) error {
+    return nil
+}
+
 // Create mock Models
 func newTestModel(t *testing.T) data.Models {
 	return data.Models{

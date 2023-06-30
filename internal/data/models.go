@@ -12,6 +12,7 @@ type Models struct {
 	Questions interface {
 		GetAllByQuizID(quizID string) ([]*Question, error)
 		AddQuestion(question *Question) error
+        Update(question *Question) error
 	}
 
 	Quizzes interface {
