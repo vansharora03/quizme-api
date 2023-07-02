@@ -4,6 +4,11 @@ type Validator struct {
     Errors map[string]string
 }
 
+// New initializes a new Validator
+func New() Validator {
+    return Validator{make(map[string]string)}
+}
+
 // Valid returns true if there are no errors in the validation
 func (v *Validator) Valid() bool {
     return len(v.Errors) == 0

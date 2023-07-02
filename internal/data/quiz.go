@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+	"vanshadhruvp/quizme-api/internal/validator"
 )
 
 type QuizModel struct {
@@ -16,6 +17,13 @@ type Quiz struct {
 	CreatedAt time.Time `json:"created_at"` // When the quiz was created
 	Version   int32 `json:"version"` // Version of the quiz
 	Title     string `json:"title"` // Title of the quiz
+}
+
+// ValidateQuiz runs all Quiz Checks
+func ValidateQuiz(v *validator.Validator, quiz *Quiz) {
+    // Run checks
+    v.Check(quiz.Title != "", "title", "must be provided")
+    v.Check(len(quiz.Title) <= 100, "title", "must be 100 characters or less")
 }
 
 // GetAll will get all quizzes in the database and return them.
