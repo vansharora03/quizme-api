@@ -62,21 +62,26 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 // addQuizHandler adds a specific quiz to the database
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a struct to hold the quiz data
-	var quiz struct {
-		Title string `json:"title"`
-	}
+    var input struct {
+        Title string `json:"title"`
+    }
 
 	// Read the json request body into the quiz struct
-	err := app.readJSON(w, r, &quiz)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
+    
+	var quiz data.Quiz 
+    quiz.Title = input.Title
 
-	if err := validator.ValidateQuiz(data.Quiz{Title: quiz.Title}); err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
+    v := validator.New()
+
+    if data.ValidateQuiz(&v, &quiz); !v.Valid() {
+        app.validationErrorResponse(w, r, v.Errors)
+        return
+    }
 
 	// Add the quiz to the database
 	title, err := app.models.Quizzes.Add(quiz.Title)
@@ -115,19 +120,19 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := validator.ValidateQuestion(
-        data.Question{Prompt: input.Prompt, Choices: input.Choices, CorrectIndex: input.CorrectIndex}); 
-        err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
 	question := data.Question{
 		Prompt:       input.Prompt,
 		Choices:      input.Choices,
 		QuizID:       quizID,
 		CorrectIndex: input.CorrectIndex,
 	}
+
+    v := validator.New()
+
+    if data.ValidateQuestion(&v, &question); !v.Valid() {
+        app.validationErrorResponse(w, r, v.Errors)
+        return
+    }
 
 	err = app.models.Questions.AddQuestion(&question)
 	if err == data.ErrNoRecords {
@@ -194,15 +199,30 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
         return
     }
 
-    var input data.Quiz
-    input.ID = id
+    var input struct {
+        Title string `json:"title"`
+        Version int32 `json:"version"`
+    }
 
     err = app.readJSON(w, r, &input)
     if err != nil {
         app.errorResponse(w, r, http.StatusBadRequest, err)
+        return
     }
 
-    err = app.models.Quizzes.Update(&input)
+    var quiz data.Quiz
+    quiz.Title = input.Title
+    quiz.Version = input.Version
+    quiz.ID = id
+
+    v := validator.New()
+
+    if data.ValidateQuiz(&v, &quiz); !v.Valid() {
+        app.validationErrorResponse(w, r, v.Errors)
+        return
+    }
+
+    err = app.models.Quizzes.Update(&quiz)
     if err != nil {
         switch {
         case err == data.ErrEditConflict:
@@ -214,7 +234,7 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
         }
     }
 
-    app.writeJSON(w, r, http.StatusOK, input, nil)
+    app.writeJSON(w, r, http.StatusOK, quiz, nil)
 }
         
 
@@ -229,13 +249,35 @@ func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Req
         return
     }
 
-    var input data.Question
-    input.ID = questionID
-    input.QuizID = quizID
+    var input struct {
+        Prompt string `json:"prompt"`
+        Choices []string `json:"choices"`
+        CorrectIndex int32 `json:"correct_index"`
+        Version int32 `json:"version"`
+    }
 
     err = app.readJSON(w, r, &input)
+    if err != nil {
+        app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+        return
+    }
 
-    err = app.models.Questions.Update(&input)
+    var question data.Question
+    question.ID = questionID
+    question.QuizID = quizID
+    question.Prompt = input.Prompt
+    question.Choices = input.Choices
+    question.CorrectIndex = input.CorrectIndex
+    question.Version = input.Version
+
+    v := validator.New()
+
+    if data.ValidateQuestion(&v, &question); !v.Valid() {
+        app.validationErrorResponse(w, r, v.Errors)
+        return
+    }
+
+    err = app.models.Questions.Update(&question)
     if err != nil {
         switch {
         case err == data.ErrEditConflict:
@@ -247,8 +289,7 @@ func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Req
         }
     }
 
-    app.writeJSON(w, r, http.StatusOK, input, nil)
-
+    app.writeJSON(w, r, http.StatusOK, question, nil)
 }
 
 

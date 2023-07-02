@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"strings"
 	"time"
-
+	"vanshadhruvp/quizme-api/internal/validator"
 	"github.com/lib/pq"
 )
 
@@ -21,6 +21,22 @@ type Question struct {
     CorrectIndex int32  `json:"correct_index"` /// The index at which the correct answer is found
     CreatedAt time.Time  `json:"created_at"` /// When the question was created
     Version int32  `json:"version"` /// The version of the question
+}
+
+// ValidateQuestion runs all Question checks
+func ValidateQuestion(v *validator.Validator, question *Question) {
+    // Run checks
+    v.Check(question.Prompt != "", "prompt", "must be provided")
+    v.Check(len(question.Prompt) <= 250, "prompt", "must be 250 characters or less")
+
+    v.Check(len(question.Choices) >= 2, "choices", "must have two or more choices")
+    for _, choice := range question.Choices {
+        v.Check(choice != "", "choices", "must not have any blank choices")
+        v.Check(len(choice) <= 250, "choices", "each choice must be 250 character or less")
+    }
+    v.Check(question.CorrectIndex >= 0, "correct_index", "must be greater than or equal to 0")
+    v.Check(question.CorrectIndex < int32(len(question.Choices)), "correct_index", 
+        "must be a valid index in choices")
 }
 
 // GetAllByQuizID returns all questions associated with the quiz with quizID

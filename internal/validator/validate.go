@@ -1,37 +1,30 @@
 package validator
 
-import "vanshadhruvp/quizme-api/internal/data"
-
-func ValidateQuiz(quiz data.Quiz) error {
-	if quiz.Title == "" {
-		return NewValidationError("Title is required")
-	}
-
-	return nil
+type Validator struct {
+    Errors map[string]string
 }
 
-func ValidateQuestion(question data.Question) error {
-	if question.Prompt == "" {
-		return NewValidationError("Prompt is required")
-	} else if question.Choices == nil {
-		return NewValidationError("Choices are required")
-	} else if question.CorrectIndex < 0 || question.CorrectIndex >= int32(len(question.Choices)) {
-		return NewValidationError("Correct index is required")
-	}
-	return nil
-
+// New initializes a new Validator
+func New() Validator {
+    return Validator{make(map[string]string)}
 }
 
-type ValidationError struct {
-	ErrorMessage string
+// Valid returns true if there are no errors in the validation
+func (v *Validator) Valid() bool {
+    return len(v.Errors) == 0
 }
 
-func NewValidationError(message string) *ValidationError {
-	return &ValidationError{
-		ErrorMessage: message,
-	}
+// Check records the validation msg if the condition is not true. 
+// After running all necessary calls to this function, the v.Valid() 
+// function can be called to see if the validation was successful.
+func (v *Validator) Check(condition bool, field, msg string) {
+    if !condition {
+        v.Add(field, msg)
+    }
 }
 
-func (v *ValidationError) Error() string {
-	return v.ErrorMessage
+// Adds the msg to field in the validator.
+func (v *Validator) Add(field, msg string) {
+    v.Errors[field] = msg
 }
+
