@@ -5,9 +5,52 @@ import (
 	"reflect"
 	"testing"
 	"time"
+    "vanshadhruvp/quizme-api/internal/validator"
 
 	"github.com/lib/pq"
 )
+
+
+func TestValidateQuestion(t *testing.T) {
+    tests := []struct{
+        name string
+        inputQuestion Question
+        expectedErrs map[string]string
+    }{
+        {"Valid question", Question{
+            Prompt: "question", 
+            Choices: []string{"true", "false"},
+            CorrectIndex: 1,
+        }, make(map[string]string)},
+        {"Empty question prompt and negative index", Question{
+            Prompt: "",
+            Choices: []string{"true", "false"},
+            CorrectIndex: -1,
+        }, map[string]string{"prompt":"must be provided", "correct_index":"must be greater than or equal to 0"}},
+        {"Empty question prompt and single choice", Question{
+            Prompt: "",
+            Choices: []string{"a",},
+            CorrectIndex: 0,
+        }, map[string]string{"prompt":"must be provided", "choices":"must have two or more choices"}},
+        {"Correct index is out of range and there is a blank choice", Question{
+            Prompt: "question",
+            Choices: []string{"a","", "c"},
+            CorrectIndex: 3,
+        }, map[string]string{"choices":"must not have any blank choices", "correct_index":"must be a valid index in choices"}},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            v := validator.New()
+
+            ValidateQuestion(&v, &tt.inputQuestion)
+
+            if !reflect.DeepEqual(v.Errors, tt.expectedErrs) {
+                t.Fatalf("INCORRECT VALIDATION: expected %v, got %v", tt.expectedErrs, v.Errors)
+            }
+        })
+    }
+}
 
 
 func TestGetAllByQuizID(t *testing.T) {

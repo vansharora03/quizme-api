@@ -2,8 +2,39 @@ package data
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
+	"vanshadhruvp/quizme-api/internal/validator"
 )
+
+func TestValidateQuiz(t *testing.T) {
+    bigString := ""
+    for i := 0; i <= 100; i++ {
+        bigString += "a"
+    }
+
+    tests := []struct{
+        name string
+        inputQuiz Quiz
+        expectedErrs map[string]string
+    }{
+        {"Valid quiz", Quiz{Title: "quiz"}, make(map[string]string)},
+        {"Empty quiz title", Quiz{Title: ""}, map[string]string{"title":"must be provided"}},
+        {"Big quiz title", Quiz{Title: bigString}, map[string]string{"title":"must be 100 characters or less"}},
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            v := validator.New()
+
+            ValidateQuiz(&v, &tt.inputQuiz)
+
+            if !reflect.DeepEqual(v.Errors, tt.expectedErrs) {
+                t.Fatalf("INCORRECT VALIDATION: expected %v, got %v", tt.expectedErrs, v.Errors)
+            }
+        })
+    }
+}
 
 func TestGetAll(t *testing.T) {
     quizModel := QuizModel{openTestDB(t)}
