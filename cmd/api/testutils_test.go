@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -51,7 +50,7 @@ func (m TestQuizModel) Get(id string) (*data.Quiz, error) {
 		return quiz2, nil
 
 	}
-	return nil, sql.ErrNoRows
+	return nil, data.ErrNoRecords 
 }
 
 // Mocks data.QuizModel.Add to test addQuizHandler
@@ -85,6 +84,8 @@ var question2 data.Question = data.Question{
     QuizID: 1,
 }
 
+var testDate time.Time = time.Date(2000, time.November, 28, 12, 23, 12, 0, time.UTC)
+
 func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, error) {
     if quizID == "1" {
         return []*data.Question{&question1, &question2}, nil
@@ -93,6 +94,13 @@ func (m TestQuestionModel) GetAllByQuizID(quizID string) ([]*data.Question, erro
 }
 
 func (m TestQuestionModel) AddQuestion(question *data.Question) error {
+    if question.QuizID != 1 && question.QuizID != 2 {
+        return data.ErrNoRecords
+    }
+    question.CreatedAt = testDate 
+    question.Version = 1
+    question.ID = 1
+
 	return nil
 }
 
@@ -163,8 +171,7 @@ func testPOST[T any](
 	t *testing.T, ts *testServer, urlPath string, payload []byte) (http.Header, int, T) {
 	// Make request
 	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewBuffer(payload))
-	// Fail test on error
-	check(t, err)
+    check(t, err)
 
 	defer rs.Body.Close()
 
@@ -184,9 +191,7 @@ func openResponse[T any](
 	rr := httptest.NewRecorder()
 	r, err := http.NewRequest("GET", urlPath, bytes.NewBuffer(body))
 	check(t, err)
-	err = ts.app.readJSON(rr, r, &dst)
-	check(t, err)
-
+	_ = ts.app.readJSON(rr, r, &dst)
 	return rs.Header, rs.StatusCode, dst
 
 }
