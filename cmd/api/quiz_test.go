@@ -82,33 +82,60 @@ func TestAddQuizHandler(t *testing.T) {
 
 }
 
-// func TestAddQuestionHandler(t *testing.T) {
-// 	// Test for a valid question request
-// 	// t.Run("ValidQuestionRequest", func(t *testing.T) {
-// 	// 	ts := newTestServer(t)
-// 	// 	defer ts.Close()
-// 	// 	_, code, _ := testPOST[string](t, ts, "/v1/quiz/1/question", []byte(`{"prompt": "quiz", "choices": ["a", "b", "c"], "correct_index": 0}`))
+func TestAddQuestionHandler(t *testing.T) {
+    ts := newTestServer(t)
+    defer ts.Close()
+    tests := []struct{
+        name string
+        quizID string
+        payload []byte
+        expectedCode int
+        expectedErr error
+        expected data.Question
+    }{
+        {"Valid post question", 
+            "1", 
+            []byte(`{"prompt":"q1", "choices": ["a", "b", "c"], "correct_index":2}`),
+            http.StatusCreated,
+            nil, 
+            data.Question{
+                Prompt: "q1",
+                Choices: []string{"a", "b", "c"},
+                CorrectIndex: 2,
+                Version: 1,
+                CreatedAt: testDate,
+                ID: 1,
+                QuizID: 1,
+            }},
+        {"Quiz does not exist", 
+            "3", 
+            []byte(`{"prompt":"q1", "choices": ["a", "b", "c"], "correct_index":2}`),
+            http.StatusNotFound,
+            data.ErrNoRecords, 
+            data.Question{}},
+    }
 
-// 	// 	expectedCode := http.StatusCreated
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            _, code, body := testPOST[data.Question](t, ts, "/v1/quiz/" + tt.quizID + "/question", tt.payload) 
+            
+            if code != tt.expectedCode {
+                t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", tt.expectedCode, code)
+            }
 
-// 	// 	if code != expectedCode {
-// 	// 		t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
-// 	// 	}
-// 	// })
+            if code != http.StatusCreated {
+                return
+            }
 
-// 	// Test for an invalid question request
-// 	t.Run("InvalidQuestionRequest", func(t *testing.T) {
-// 		ts := newTestServer(t)
-// 		defer ts.Close()
-// 		_, code, _ := testPOST[string](t, ts, "/v1/quiz/1/question", []byte(`{"prompt" : ""}`))
-// 		expectedCode := http.StatusInternalServerError
+            if !reflect.DeepEqual(body, tt.expected) {
+                t.Fatalf("INCORRECT BODY: expected %v, got %v", tt.expected, body)
+            }
 
-// 		if code != expectedCode {
-// 			t.Fatalf("INCORRECT STATUS CODE: expected %d, got %d", expectedCode, code)
-// 		}
-// 	})
+            
+        })
+    }
+}
 
-// }
 
 func TestAddScoreHandler(t *testing.T) {
 	ts := newTestServer(t)
