@@ -7,6 +7,7 @@ import (
 
 var ErrNoRecords = errors.New("No records found")
 var ErrEditConflict = errors.New("Edit conflict")
+var ErrDuplicateEmail = errors.New("Email exists already")
 
 type Models struct {
 	Questions interface {
@@ -21,6 +22,10 @@ type Models struct {
 		Add(title string) (string, error)
         Update(quiz *Quiz) error
 	}
+
+    Users interface {
+        AddUser(user *User) error
+    }
 }
 
 // NewModels initializes a Models struct with
@@ -29,5 +34,6 @@ func NewModels(db *sql.DB) Models {
 	return Models{
 		Questions: QuestionModel{db},
 		Quizzes:   QuizModel{db},
+        Users: UserModel{db},
 	}
 }

@@ -1,9 +1,10 @@
 package data
 
 import (
-    "vanshadhruvp/quizme-api/internal/validator"
-    "testing"
-    "reflect"
+	"errors"
+	"reflect"
+	"testing"
+	"vanshadhruvp/quizme-api/internal/validator"
 )
 
 func TestValidateUser(t *testing.T) {
@@ -39,5 +40,47 @@ func TestValidateUser(t *testing.T) {
                 t.Fatalf("INCORRECT VALIDATION: expected %v, got %v", tt.expectedErrs, v.Errors)
             }
         })
+    }
+}
+
+func TestAddUser(t *testing.T) {
+    users := UserModel{openTestDB(t)}
+    tests := []struct{
+        name string
+        user User
+        expectedErr error
+        expectedID int64
+    }{
+        {
+            "Valid user_account", 
+            User{ Username: "user123", HashedPassword: []byte("abcdef"), Email: "user@domain.com",}, 
+            nil, int64(1),
+        }, 
+        {
+            "Repeated email", 
+            User{ Username: "user123", HashedPassword: []byte("abcdef"), Email: "user@domain.com",}, 
+            ErrDuplicateEmail, int64(0),
+        }, 
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            err := users.AddUser(&tt.user)
+            
+            if tt.expectedErr != nil {
+                switch {
+                case errors.Is(err, tt.expectedErr):
+                    return
+                default:
+                    t.Fatalf("INCORRECT ERROR: expected %v, got %v", tt.expectedErr, err)
+                }
+            }
+
+            if tt.user.ID != tt.expectedID {
+                t.Fatalf("INCORRECT ENTRY ID: expected %d, got %d", tt.expectedID, tt.user.ID)
+            }
+
+        })
+
     }
 }
