@@ -1,8 +1,10 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"regexp"
+	"strings"
 	"time"
 	"vanshadhruvp/quizme-api/internal/validator"
 
@@ -63,5 +65,37 @@ func ValidateUser(v *validator.Validator, user *User) {
     v.Check(user.Username != "", "username", "must be provided")
     v.Check(len(user.Username) <= 50, "username", "must be less than 50 characters")
 }
+
+// AddUser will add the user to the database
+func (m UserModel) AddUser(user *User) error {
+    stmt := `INSERT INTO user_account (username, hashed_password, email)
+    VALUES ($1, $2, $3)
+    RETURNING created_at, version, id`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    err := m.DB.QueryRowContext(ctx, stmt, user.Username, user.HashedPassword, user.Email).Scan(
+        &user.CreatedAt, &user.Version, &user.ID)
+    if err != nil {
+        switch {
+        case strings.Contains(err.Error(), "user_account_email_key"):
+            return ErrDuplicateEmail
+        default:
+            return err
+        }
+    }
+
+    return nil
+}
+
+
+
+
+
+
+
+
+
 
 
