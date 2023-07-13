@@ -108,11 +108,18 @@ func (m TestQuestionModel) Update(question *data.Question) error {
     return nil
 }
 
+type TestUserModel struct {}
+
+func (m TestUserModel) AddUser(user *data.User) error {
+    return nil
+}
+
 // Create mock Models
 func newTestModel(t *testing.T) data.Models {
 	return data.Models{
 		Quizzes:   TestQuizModel{},
 		Questions: TestQuestionModel{},
+        Users: TestUserModel{},
 	}
 }
 
