@@ -11,7 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type User struct {
     ID int64 `json:"id"`
     Username string `json:"username"`
