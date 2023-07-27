@@ -3,6 +3,8 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -25,6 +27,7 @@ type UserModel struct {
     DB *sql.DB
 }
 
+
 // HashUser will create a hashed version of the user's password and store it in user.HashedPassword
 func HashUser(user *User) error {
     hashed, err := bcrypt.GenerateFromPassword([]byte(user.PlaintextPassword), 12)
@@ -35,6 +38,11 @@ func HashUser(user *User) error {
     user.HashedPassword = hashed
 
     return nil
+}
+
+func (user *User) MatchPassword(password string) error {
+    err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(password))
+    return err
 }
 
 // ValidateEmail will run all email validation checks
@@ -86,6 +94,36 @@ func (m UserModel) AddUser(user *User) error {
     }
 
     return nil
+}
+
+// GetUserByEmail fetches the user by the given email
+func (m UserModel) GetUserByEmail(email string) (*User, error) {
+    stmt := `SELECT id, email, username, hashed_password, created_at, version
+    FROM user_account
+    WHERE email = $1`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    var user User
+
+    err := m.DB.QueryRowContext(ctx, stmt, email).Scan(
+        &user.ID, 
+        &user.Email,
+        &user.Username, 
+        &user.HashedPassword,
+        &user.CreatedAt,
+        &user.Version)
+    if err != nil {
+        switch {
+        case errors.Is(err, sql.ErrNoRows):
+            return nil, ErrNoRecords
+        default:
+            return nil, err
+        }
+    }
+
+    return &user, nil
 }
 
 

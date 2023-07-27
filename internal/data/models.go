@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+    "time"
 )
 
 var ErrNoRecords = errors.New("No records found")
@@ -25,6 +26,11 @@ type Models struct {
 
     Users interface {
         AddUser(user *User) error
+        GetUserByEmail(email string) (*User, error)
+    }
+
+    Tokens interface {
+        AddToken(userID int64, lifetime time.Duration) (*Token, error) 
     }
 }
 
@@ -35,5 +41,6 @@ func NewModels(db *sql.DB) Models {
 		Questions: QuestionModel{db},
 		Quizzes:   QuizModel{db},
         Users: UserModel{db},
+        Tokens: TokenModel{db},
 	}
 }

@@ -42,18 +42,18 @@ func generateToken(userID int64, lifetime time.Duration) (*Token, error) {
 }
 
 // AddToken adds an auth token for the user to the database.
-func (m TokenModel) AddToken(userID int64, lifetime time.Duration) error {
+func (m TokenModel) AddToken(userID int64, lifetime time.Duration) (*Token, error) {
     token, err := generateToken(userID, lifetime)
     if err != nil {
-        return err
+        return nil, err
     }
     
-    stmt := `INSERT INTO token (hash, userID, expiry)
+    stmt := `INSERT INTO token (hash, user_id, expiry)
     VALUES ($1, $2, $3)`
 
     ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
     defer cancel()
 
     _, err = m.DB.ExecContext(ctx, stmt, token.Hash, token.UserID, token.Expiry)
-    return err
+    return token, err
 }

@@ -32,6 +32,7 @@ func (app *application) routes() http.Handler {
     router.HandlerFunc(http.MethodPut, "/v1/quiz/:id/question/:questionID", app.updateQuestionHandler)
 
     router.HandlerFunc(http.MethodPost, "/v1/user", app.addUserHandler)
+    router.HandlerFunc(http.MethodPost, "/v1/user/login", app.userLoginHandler)
 
 
 	return standardMiddleware.Then(router)
