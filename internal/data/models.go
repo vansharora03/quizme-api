@@ -27,6 +27,7 @@ type Models struct {
     Users interface {
         AddUser(user *User) error
         GetUserByEmail(email string) (*User, error)
+        GetUserByToken(token string) (*User, error)
     }
 
     Tokens interface {
