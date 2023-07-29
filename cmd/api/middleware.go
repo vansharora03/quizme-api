@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/justinas/nosurf"
 	"golang.org/x/time/rate"
+
+	"vanshadhruvp/quizme-api/internal/data"
 )
 
 // Secure headers for http requests
@@ -131,3 +136,46 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
     })
 
 }
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        authHeader := r.Header.Get("Authorization")
+        if authHeader == "" {
+            r.WithContext(context.WithValue(r.Context(), "user", data.AnonymousUser))
+            next.ServeHTTP(w, r)
+            return 
+        }
+
+        authHeaderSplit := strings.Split(authHeader, " ")
+        if len(authHeaderSplit) < 2 || authHeaderSplit[0] != "Bearer" {
+            app.errorResponse(w, r, http.StatusBadRequest, 
+                fmt.Sprintf("Malformed Authorization Header: %s", authHeader),
+            )
+            return
+        }
+
+        token := authHeaderSplit[1]
+        user, err := app.models.Users.GetUserByToken(token)
+
+        if err != nil {
+            switch {
+            case errors.Is(err, data.ErrNoRecords):
+                app.errorResponse(w, r, http.StatusUnauthorized, "Token is invalid or expired")
+            default:
+                app.serverErrorResponse(w, r, err)
+            }
+            return
+        }
+    
+
+        r.WithContext(context.WithValue(r.Context(), "user", user))
+        next.ServeHTTP(w, r)
+    })
+
+}
+
+
+
+
+
+
