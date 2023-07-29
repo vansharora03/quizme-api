@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"regexp"
@@ -25,6 +26,8 @@ type User struct {
 type UserModel struct {
     DB *sql.DB
 }
+
+var AnonymousUser = &User{}
 
 
 // HashUser will create a hashed version of the user's password and store it in user.HashedPassword
@@ -123,6 +126,34 @@ func (m UserModel) GetUserByEmail(email string) (*User, error) {
     }
 
     return &user, nil
+}
+
+// GetUserByToken fetches the user by the given token
+func (m UserModel) GetUserByToken(token string) (*User, error) {
+    stmt := `SELECT user_account.id, user_account.email, user_account.username
+    FROM user_account
+    INNER JOIN token
+    ON token.user_id = user_account.id
+    WHERE token.hash = $1 AND token.expiry > NOW()`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+    defer cancel()
+
+    var user *User = &User{}
+    hash := sha256.Sum256([]byte(token))
+    err := m.DB.QueryRowContext(ctx, stmt, hash[:]).Scan(
+        &user.ID, &user.Email, &user.Username,
+    )
+    if err != nil {
+        switch {
+        case errors.Is(err, sql.ErrNoRows):
+            return nil, ErrNoRecords
+        default:
+            return nil, err
+        }
+    }
+
+    return user, nil
 }
 
 
