@@ -17,6 +17,7 @@ type Quiz struct {
 	CreatedAt time.Time `json:"created_at"` // When the quiz was created
 	Version   int32 `json:"version"` // Version of the quiz
 	Title     string `json:"title"` // Title of the quiz
+    UserID int64 `json:"user_id"` // ID of the author
 }
 
 // ValidateQuiz runs all Quiz Checks
@@ -89,21 +90,23 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 }
 
 // Add will add a quiz to the database and return the id of the quiz.
-func (m QuizModel) Add(title string) (string, error) {
-	stmt := `INSERT INTO quiz (title)
-    VALUES($1) RETURNING title`
+func (m QuizModel) Add(title string, userID int64) (*Quiz, error) {
+	stmt := `INSERT INTO quiz (title, user_id)
+    VALUES($1, $2) RETURNING title, created_at, version, id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	row := m.DB.QueryRowContext(ctx, stmt, title)
+	row := m.DB.QueryRowContext(ctx, stmt, title, userID)
 
-	err := row.Scan(&title)
+    quiz := &Quiz{UserID: userID}
+
+	err := row.Scan(&quiz.Title, &quiz.CreatedAt, &quiz.Version, &quiz.ID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return title, nil
+	return quiz, nil
 }
 
 
