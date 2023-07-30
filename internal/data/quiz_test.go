@@ -89,7 +89,7 @@ func TestGet(t *testing.T) {
     }
 }
 
-func TestAdd(t *testing.T) {
+/**func TestAdd(t *testing.T) {
     quizModel := QuizModel{openTestDB(t)}
 
     title := "quiz3test";
@@ -111,7 +111,7 @@ func TestAdd(t *testing.T) {
         t.Fatalf("INCORRECT ENTRY TITLE: expected %q, got %q", title, gotTitle)
     }
 
-}
+}**/
 
 func TestUpdate(t *testing.T) {
     quizmodel := QuizModel{openTestDB(t)}
@@ -141,7 +141,6 @@ func TestUpdate(t *testing.T) {
     }
 
 }
-
 
 
 

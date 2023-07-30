@@ -61,6 +61,13 @@ func (app *application) showQuizHandler(w http.ResponseWriter, r *http.Request) 
 
 // addQuizHandler adds a specific quiz to the database
 func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := (r.Context().Value("user"))
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
+
 	// Create a struct to hold the quiz data
     var input struct {
         Title string `json:"title"`
@@ -84,14 +91,14 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
     }
 
 	// Add the quiz to the database
-	title, err := app.models.Quizzes.Add(quiz.Title)
+    q, err := app.models.Quizzes.Add(quiz.Title, user.ID)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	// Send the id of the quiz in the response
-	app.writeJSON(w, r, http.StatusCreated, title, nil)
+	app.writeJSON(w, r, http.StatusCreated, q, nil)
 
 }
 

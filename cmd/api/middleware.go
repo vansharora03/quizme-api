@@ -141,7 +141,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         authHeader := r.Header.Get("Authorization")
         if authHeader == "" {
-            r.WithContext(context.WithValue(r.Context(), "user", data.AnonymousUser))
+            r = r.WithContext(context.WithValue(r.Context(), "user", data.AnonymousUser))
             next.ServeHTTP(w, r)
             return 
         }
@@ -168,7 +168,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
         }
     
 
-        r.WithContext(context.WithValue(r.Context(), "user", user))
+        r = r.WithContext(context.WithValue(r.Context(), "user", user))
         next.ServeHTTP(w, r)
     })
 

@@ -20,7 +20,7 @@ type Models struct {
 	Quizzes interface {
 		GetAll() ([]*Quiz, error)
 		Get(id string) (*Quiz, error)
-		Add(title string) (string, error)
+		Add(title string, userID int64) (*Quiz, error)
         Update(quiz *Quiz) error
 	}
 
