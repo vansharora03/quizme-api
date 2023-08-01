@@ -53,5 +53,5 @@ func (app *application) validationErrorResponse(w http.ResponseWriter, r *http.R
 // forbiddenResponse writes a Forbidden response to the user, to be used when
 // a user must be logged in to use a resource
 func (app *application) forbiddenResponse(w http.ResponseWriter, r *http.Request) {
-        app.errorResponse(w, r, http.StatusForbidden, "Please log in to use this route")
+        app.errorResponse(w, r, http.StatusForbidden, "You are not authorized to use this resource")
 }

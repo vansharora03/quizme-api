@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
@@ -106,6 +107,12 @@ func (app *application) addQuizHandler(w http.ResponseWriter, r *http.Request) {
 // adds the question to the database, as well as responding to the
 // client with the added question.
 func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := r.Context().Value("user")
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
 	// Get the id of the quiz from the url
 	params := httprouter.ParamsFromContext(r.Context())
 	stringID := params.ByName("id")
@@ -140,6 +147,19 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
         app.validationErrorResponse(w, r, v.Errors)
         return
     }
+
+    quiz, err := app.models.Quizzes.Get(fmt.Sprintf("%d", quizID))
+    if err == data.ErrNoRecords {
+        app.notFoundResponse(w, r)
+        return
+    } else if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    } else if quiz.UserID != user.ID {
+        app.forbiddenResponse(w, r)
+        return
+    }
+
 
 	err = app.models.Questions.AddQuestion(&question)
 	if err == data.ErrNoRecords {

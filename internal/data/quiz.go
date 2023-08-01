@@ -63,7 +63,7 @@ func (m QuizModel) GetAll() ([]*Quiz, error) {
 // Get will get a specific quiz from the database and return it based on the id.
 func (m QuizModel) Get(id string) (*Quiz, error) {
 
-	stmt := `SELECT id, created_at, version, title FROM quiz WHERE id = $1`
+	stmt := `SELECT id, created_at, version, title, user_id FROM quiz WHERE id = $1`
 
 	// Create a context with a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -76,7 +76,7 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 	q := &Quiz{}
 
 	// Copy the values from row into the Quiz struct
-	err := row.Scan(&q.ID, &q.CreatedAt, &q.Version, &q.Title)
+	err := row.Scan(&q.ID, &q.CreatedAt, &q.Version, &q.Title, &q.UserID)
 
 	if err != nil {
         if err == sql.ErrNoRows {
