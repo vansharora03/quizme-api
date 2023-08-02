@@ -92,7 +92,7 @@ func (m QuizModel) Get(id string) (*Quiz, error) {
 // Add will add a quiz to the database and return the id of the quiz.
 func (m QuizModel) Add(title string, userID int64) (*Quiz, error) {
 	stmt := `INSERT INTO quiz (title, user_id)
-    VALUES($1, $2) RETURNING title, created_at, version, id`
+    VALUES($1, $2) RETURNING title, created_at, version, id, user_id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -101,7 +101,7 @@ func (m QuizModel) Add(title string, userID int64) (*Quiz, error) {
 
     quiz := &Quiz{UserID: userID}
 
-	err := row.Scan(&quiz.Title, &quiz.CreatedAt, &quiz.Version, &quiz.ID)
+	err := row.Scan(&quiz.Title, &quiz.CreatedAt, &quiz.Version, &quiz.ID, &quiz.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (m QuizModel) Update(quiz *Quiz) error {
     stmt := `UPDATE quiz
     SET title = $1, version = version + 1
     WHERE id = $2 AND version = $3
-    RETURNING version`
+    RETURNING version, user_id`
 
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
@@ -125,7 +125,7 @@ func (m QuizModel) Update(quiz *Quiz) error {
     err := m.DB.QueryRowContext(ctx, stmt, 
         quiz.Title, 
         quiz.ID, 
-        quiz.Version).Scan(&quiz.Version)
+        quiz.Version).Scan(&quiz.Version, &quiz.UserID)
     
     if err != nil {
         switch {

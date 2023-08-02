@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"vanshadhruvp/quizme-api/internal/data"
@@ -148,18 +147,9 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
         return
     }
 
-    quiz, err := app.models.Quizzes.Get(fmt.Sprintf("%d", quizID))
-    if err == data.ErrNoRecords {
-        app.notFoundResponse(w, r)
-        return
-    } else if err != nil {
-        app.serverErrorResponse(w, r, err)
-        return
-    } else if quiz.UserID != user.ID {
-        app.forbiddenResponse(w, r)
+    if !app.userMatchesQuiz(w, r, user.ID, quizID) {
         return
     }
-
 
 	err = app.models.Questions.AddQuestion(&question)
 	if err == data.ErrNoRecords {
@@ -219,6 +209,13 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
 // updateQuizHandler receives a quiz from the json request and 
 // updates the corresponding quiz in the database
 func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := r.Context().Value("user");
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
+
     params := httprouter.ParamsFromContext(r.Context())
     id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
     if err != nil {
@@ -249,6 +246,10 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
         return
     }
 
+    if !app.userMatchesQuiz(w, r, user.ID, quiz.ID) {
+        return
+    }
+
     err = app.models.Quizzes.Update(&quiz)
     if err != nil {
         switch {
@@ -268,6 +269,14 @@ func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request
 // updateQuestionHandler receives an updated question from the user and updates the
 // question in the database
 func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := r.Context().Value("user");
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
+    
+
     params := httprouter.ParamsFromContext(r.Context())
     quizID, err := strconv.ParseInt(params.ByName("id"), 10, 64)
     questionID, err := strconv.ParseInt(params.ByName("questionID"), 10, 64)
@@ -301,6 +310,10 @@ func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Req
 
     if data.ValidateQuestion(&v, &question); !v.Valid() {
         app.validationErrorResponse(w, r, v.Errors)
+        return
+    }
+
+    if !app.userMatchesQuiz(w, r, user.ID, quizID) {
         return
     }
 
