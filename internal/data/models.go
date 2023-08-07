@@ -33,6 +33,11 @@ type Models struct {
     Tokens interface {
         AddToken(userID int64, lifetime time.Duration) (*Token, error) 
     }
+
+    Scores interface {
+        AddScore(score *Score) error
+        GetScoresByUserAndQuiz(userID, quizID int64) ([]*Score, error)
+    }
 }
 
 // NewModels initializes a Models struct with
@@ -43,5 +48,6 @@ func NewModels(db *sql.DB) Models {
 		Quizzes:   QuizModel{db},
         Users: UserModel{db},
         Tokens: TokenModel{db},
+        Scores: ScoreModel{db},
 	}
 }

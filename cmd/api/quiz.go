@@ -163,49 +163,6 @@ func (app *application) addQuestionHandler(w http.ResponseWriter, r *http.Reques
 	app.writeJSON(w, r, http.StatusCreated, question, nil)
 }
 
-// addScoreHandler receives a json response containing the user's
-// quiz answers and returns the user's score on the quiz.
-func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) {
-    params := httprouter.ParamsFromContext(r.Context())
-    id := params.ByName("id")
-    var input struct {
-        Answers []int32 `json:"answers"`
-    }
-
-    err := app.readJSON(w, r, &input)
-    if err != nil {
-        app.errorResponse(w, r, http.StatusBadRequest, err)
-        return
-    }
-
-    questions, err := app.models.Questions.GetAllByQuizID(id)
-    if err != nil {
-        app.serverErrorResponse(w, r, err)
-        return
-    }
-    // return NotFound if questions is empty
-    if len(questions) == 0 {
-        app.notFoundResponse(w, r)
-        return
-    }
-
-    correct := 0
-    for i, question := range questions {
-        if input.Answers[i] == question.CorrectIndex {
-            correct += 1
-        }
-    }
-
-    score := float32(correct) / float32(len(questions)) * 100.0
-
-    err = app.writeJSON(w, r, http.StatusOK, score, nil)
-    if err != nil {
-        app.serverErrorResponse(w, r, err)
-    }
-}
-
-
-
 // updateQuizHandler receives a quiz from the json request and 
 // updates the corresponding quiz in the database
 func (app *application) updateQuizHandler(w http.ResponseWriter, r *http.Request) {
@@ -330,6 +287,69 @@ func (app *application) updateQuestionHandler(w http.ResponseWriter, r *http.Req
     }
 
     app.writeJSON(w, r, http.StatusOK, question, nil)
+}
+
+// addScoreHandler takes a user's answers and scores it, sending the score to the database.
+func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := r.Context().Value("user")
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
+
+    params := httprouter.ParamsFromContext(r.Context())
+    quizIDRaw := params.ByName("id")
+    quizID, err := strconv.ParseInt(quizIDRaw, 10, 64)
+    if err != nil || quizID < 1 {
+        app.notFoundResponse(w, r)
+        return
+    }
+
+    var input struct {
+        answers []int32
+    }
+
+    err = app.readJSON(w, r, &input)
+    if err != nil {
+        app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+        return
+    }
+
+    score := &data.Score{
+        QuizID: quizID,
+        UserID: user.ID,
+    }
+
+    questions, err := app.models.Questions.GetAllByQuizID(quizIDRaw)
+    if err != nil {
+        switch {
+        case err == data.ErrNoRecords:
+            app.notFoundResponse(w, r)
+            return
+        default:
+            app.serverErrorResponse(w, r, err)
+            return
+        }
+    }
+
+    err = score.CalcScore(questions, input.answers)
+    if err != nil {
+        app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+        return
+    }
+
+    err = app.models.Scores.AddScore(score)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
+
+    err = app.writeJSON(w, r, http.StatusCreated, score, nil)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+    }
+
 }
 
 
