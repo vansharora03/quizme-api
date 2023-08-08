@@ -24,6 +24,7 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/v1/healthcheck", dynamicMiddleware.ThenFunc(app.healthcheckHandler))
 	router.Handler(http.MethodGet, "/v1/quiz", dynamicMiddleware.ThenFunc(app.showAllQuizzesHandler))
     router.Handler(http.MethodGet, "/v1/quiz/:id", dynamicMiddleware.ThenFunc(app.showQuizHandler))
+    router.Handler(http.MethodGet, "/v1/quiz/:id/score", dynamicMiddleware.ThenFunc(app.showScoresHandler))
     router.Handler(http.MethodPost, "/v1/quiz", dynamicMiddleware.ThenFunc(app.addQuizHandler))
     router.Handler(http.MethodPost, "/v1/quiz/:id/score", dynamicMiddleware.ThenFunc(app.addScoreHandler))
     router.Handler(http.MethodPost, "/v1/quiz/:id/question", dynamicMiddleware.ThenFunc(app.addQuestionHandler))

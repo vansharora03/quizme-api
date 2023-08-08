@@ -352,6 +352,40 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// showScoresHandler shows all of the user's scores on the chosen quiz
+func (app *application) showScoresHandler(w http.ResponseWriter, r *http.Request) {
+    userVal := r.Context().Value("user")
+    user := userVal.(*data.User)
+    if user == data.AnonymousUser {
+        app.forbiddenResponse(w, r)
+        return
+    }
+
+    params := httprouter.ParamsFromContext(r.Context())
+    quizID, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+    if err != nil || quizID < 1 {
+        app.notFoundResponse(w, r)
+        return
+    }
+
+    scores, err := app.models.Scores.GetScoresByUserAndQuiz(user.ID, quizID)
+    if err != nil {
+        switch {
+        case err == data.ErrNoRecords:
+            app.notFoundResponse(w, r)
+            return
+        default:
+            app.serverErrorResponse(w, r, err)
+            return
+        }
+    }
+
+    err = app.writeJSON(w, r, http.StatusOK, scores, nil)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+    }
+}
+
 
 
 

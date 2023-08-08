@@ -94,10 +94,6 @@ func (m ScoreModel) GetScoresByUserAndQuiz(userID, quizID int64) ([]*Score, erro
         return nil, rows.Err()
     }
 
-    if len(scores) == 0 {
-        return nil, ErrNoRecords
-    }
-
 
     return scores, nil
 }
