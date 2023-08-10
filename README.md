@@ -3,7 +3,7 @@ RESTful API for QuizMe.
 ## How to use
 ## Authentication -> Becoming a registered user
 - Sign up using POST on `/v1/user`
-- Get temporary log in token from `/v1/user`
+- Get temporary log in token from `/v1/user/login`
 - Use this token in this format in the header of every request requiring authentication `Authorization: Bearer TOKEN`
 - When this token expires, you must get a new one from the login route.
 ### Global:
