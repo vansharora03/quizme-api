@@ -82,8 +82,8 @@ func (m ScoreModel) GetScoresByUserAndQuiz(userID, quizID int64) ([]*Score, erro
 
     for rows.Next() {
         score := &Score{}
-        err := rows.Scan(&score.ID, &score.UserID, &score.QuizID, &score.ChosenChoicesIndices,
-            &score.ChosenChoicesCorrectness, &score.CreatedAt, &score.Version)
+        err := rows.Scan(&score.ID, &score.UserID, &score.QuizID, pq.Array(&score.ChosenChoicesIndices),
+            pq.Array(&score.ChosenChoicesCorrectness), &score.CreatedAt, &score.Version)
         if err != nil {
             return nil, err
         }

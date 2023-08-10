@@ -307,7 +307,7 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
     }
 
     var input struct {
-        answers []int32
+        Answers []int32
     }
 
     err = app.readJSON(w, r, &input)
@@ -333,7 +333,7 @@ func (app *application) addScoreHandler(w http.ResponseWriter, r *http.Request) 
         }
     }
 
-    err = score.CalcScore(questions, input.answers)
+    err = score.CalcScore(questions, input.Answers)
     if err != nil {
         app.errorResponse(w, r, http.StatusBadRequest, err.Error())
         return
